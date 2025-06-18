@@ -99,6 +99,95 @@ export type Database = {
         }
         Relationships: []
       }
+      client_progress: {
+        Row: {
+          assigned_by: string | null
+          assigned_to: string | null
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          assigned_to?: string | null
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          assigned_to?: string | null
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_progress_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          assigned_to: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fan_cards: {
         Row: {
           album_id: string
@@ -250,6 +339,30 @@ export type Database = {
         }
         Relationships: []
       }
+      team_permissions: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          permission: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tracks: {
         Row: {
           album_id: string | null
@@ -360,13 +473,23 @@ export type Database = {
           unique_locations: number
         }[]
       }
+      has_permission: {
+        Args: { user_id: string; permission_name: string }
+        Returns: boolean
+      }
       is_super_admin: {
         Args: { user_id: string }
         Returns: boolean
       }
     }
     Enums: {
-      app_role: "artist" | "super_admin" | "fan"
+      app_role:
+        | "artist"
+        | "super_admin"
+        | "fan"
+        | "team_member"
+        | "user"
+        | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -482,7 +605,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["artist", "super_admin", "fan"],
+      app_role: [
+        "artist",
+        "super_admin",
+        "fan",
+        "team_member",
+        "user",
+        "admin",
+      ],
     },
   },
 } as const
