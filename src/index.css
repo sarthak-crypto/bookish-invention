@@ -1,0 +1,105 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 45 67% 86%; /* #F4E9C1 */
+    --foreground: 25 55% 52%; /* #C87343 - Primary Text */
+    --foreground-dark: 340 60% 9%; /* #220C10 - Secondary Text */
+
+    --card: 45 67% 86%; /* #F4E9C1 */
+    --card-foreground: 25 55% 52%;
+
+    --popover: 45 67% 86%;
+    --popover-foreground: 25 55% 52%;
+
+    --primary: 35 57% 57%; /* #D1A054 - Accent */
+    --primary-foreground: 340 60% 9%; /* #220C10 for text on primary */
+
+    --secondary: 35 40% 70%; /* Lighter accent or secondary element background */
+    --secondary-foreground: 340 60% 9%;
+
+    --muted: 45 30% 90%; /* Muted version of background */
+    --muted-foreground: 25 40% 40%;
+
+    --accent: 35 57% 57%; /* #D1A054 */
+    --accent-foreground: 340 60% 9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 35 40% 75%; /* Based on #D1A054, but lighter/desaturated */
+    --input: 35 40% 80%; /* Based on #D1A054, but lighter/desaturated */
+    --ring: 35 57% 57%; /* #D1A054 */
+
+    --radius: 0.5rem;
+
+    /* Sidebar specific colors can be adjusted if needed, for now they can inherit or use defaults */
+    --sidebar-background: 45 70% 90%; /* Lighter version of main background */
+    --sidebar-foreground: 340 60% 9%;
+    --sidebar-primary: 35 57% 57%;
+    --sidebar-primary-foreground: 340 60% 9%;
+    --sidebar-accent: 35 50% 65%;
+    --sidebar-accent-foreground: 340 60% 9%;
+    --sidebar-border: 35 40% 75%;
+    --sidebar-ring: 35 57% 57%;
+  }
+
+  /* Dark mode is not explicitly requested, but we keep the structure.
+     If dark mode is needed, these colors would need to be defined according to the theme.
+     For now, they can mirror light mode or use generic dark fallbacks.
+  */
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-saira; /* Apply Saira font globally */
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-foreground-dark; /* Use darker text for headings for better contrast */
+  }
+}
