@@ -5,7 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Video, Edit, Trash2 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Video, Edit, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SecureMediaPlayer from '@/components/media/SecureMediaPlayer';
 
@@ -18,18 +21,33 @@ interface VideoFile {
   associated_track_id?: string | null;
 }
 
+interface Track {
+  id: string;
+  title: string;
+}
+
 const MyVideos: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [videos, setVideos] = useState<VideoFile[]>([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<VideoFile | null>(null);
   const [editingVideo, setEditingVideo] = useState<VideoFile | null>(null);
   const [newTitle, setNewTitle] = useState('');
+  
+  // Upload dialog state
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [uploadTitle, setUploadTitle] = useState('');
+  const [selectedTrackId, setSelectedTrackId] = useState<string>('none');
 
   useEffect(() => {
     if (user) {
       fetchVideos();
+      fetchTracks();
     }
   }, [user]);
 
@@ -52,6 +70,97 @@ const MyVideos: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTracks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tracks')
+        .select('id, title')
+        .eq('user_id', user?.id)
+        .order('title');
+
+      if (error) throw error;
+      setTracks(data || []);
+    } catch (error) {
+      console.error('Error fetching tracks:', error);
+    }
+  };
+
+  const handleVideoUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!videoFile || !uploadTitle || !user) return;
+
+    setUploading(true);
+    try {
+      // Upload video file
+      const videoFileName = `${user.id}/${Date.now()}_${videoFile.name}`;
+      const { data: videoData, error: videoError } = await supabase.storage
+        .from('video-files')
+        .upload(videoFileName, videoFile);
+
+      if (videoError) throw videoError;
+
+      let thumbnailUrl = null;
+      if (thumbnailFile) {
+        // Upload thumbnail
+        const thumbnailFileName = `${user.id}/thumbnails/${Date.now()}_${thumbnailFile.name}`;
+        const { data: thumbnailData, error: thumbnailError } = await supabase.storage
+          .from('video-files')
+          .upload(thumbnailFileName, thumbnailFile);
+
+        if (thumbnailError) throw thumbnailError;
+
+        const { data: { publicUrl: thumbnailPublicUrl } } = supabase.storage
+          .from('video-files')
+          .getPublicUrl(thumbnailData.path);
+        
+        thumbnailUrl = thumbnailPublicUrl;
+      }
+
+      // Get video file URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('video-files')
+        .getPublicUrl(videoData.path);
+
+      // Save video metadata to database
+      const { error: dbError } = await supabase
+        .from('videos')
+        .insert({
+          user_id: user.id,
+          title: uploadTitle,
+          file_url: publicUrl,
+          thumbnail_url: thumbnailUrl,
+          associated_track_id: selectedTrackId === 'none' ? null : selectedTrackId
+        });
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Success",
+        description: "Video uploaded successfully!",
+      });
+
+      // Reset form and close dialog
+      setVideoFile(null);
+      setThumbnailFile(null);
+      setUploadTitle('');
+      setSelectedTrackId('none');
+      setUploadDialogOpen(false);
+      
+      // Refresh videos list
+      fetchVideos();
+
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload video. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -162,10 +271,16 @@ const MyVideos: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            My Videos ({videos.length} videos)
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              My Videos ({videos.length} videos)
+            </CardTitle>
+            <Button onClick={() => setUploadDialogOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Video
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {videos.length === 0 ? (
@@ -270,6 +385,74 @@ const MyVideos: React.FC = () => {
           onMediaEnd={handleVideoEnd}
         />
       )}
+
+      {/* Upload Video Dialog */}
+      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              Upload Video
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleVideoUpload} className="space-y-4">
+            <div>
+              <Label htmlFor="upload-title">Video Title</Label>
+              <Input
+                id="upload-title"
+                type="text"
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="Enter video title"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="video-file">Video File</Label>
+              <Input
+                id="video-file"
+                type="file"
+                accept="video/*"
+                onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="thumbnail-file">Thumbnail (Optional)</Label>
+              <Input
+                id="thumbnail-file"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="track-select">Associate with Song (Optional)</Label>
+              <Select value={selectedTrackId} onValueChange={setSelectedTrackId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a song to associate" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No association</SelectItem>
+                  {tracks.map((track) => (
+                    <SelectItem key={track.id} value={track.id}>
+                      {track.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button type="submit" disabled={uploading || !videoFile || !uploadTitle} className="w-full">
+              <Upload className="h-4 w-4 mr-2" />
+              {uploading ? 'Uploading...' : 'Upload Video'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

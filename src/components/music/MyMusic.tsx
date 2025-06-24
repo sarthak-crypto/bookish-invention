@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Music, Album, Edit, Trash2 } from 'lucide-react';
+import { Music, Album, Edit, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SecureMediaPlayer from '@/components/media/SecureMediaPlayer';
+import UploadMusicDialog from './UploadMusicDialog';
 
 interface Track {
   id: string;
@@ -28,6 +29,7 @@ const MyMusic: React.FC = () => {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const [newTitle, setNewTitle] = useState('');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -155,6 +157,10 @@ const MyMusic: React.FC = () => {
     }
   };
 
+  const handleUploadSuccess = () => {
+    fetchTracks();
+  };
+
   if (loading) {
     return (
       <Card>
@@ -169,16 +175,28 @@ const MyMusic: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Music className="h-5 w-5" />
-            My Music ({tracks.length} tracks)
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Music className="h-5 w-5" />
+              My Music ({tracks.length} tracks)
+            </CardTitle>
+            <Button onClick={() => setUploadDialogOpen(true)} className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Upload Music
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {tracks.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              No music uploaded yet. Start by uploading your first track!
-            </p>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">
+                No music uploaded yet. Start by uploading your first track!
+              </p>
+              <Button onClick={() => setUploadDialogOpen(true)} className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Upload Your First Track
+              </Button>
+            </div>
           ) : (
             <div className="space-y-3">
               {tracks.map((track) => (
@@ -286,6 +304,12 @@ const MyMusic: React.FC = () => {
           onMediaEnd={handleTrackEnd}
         />
       )}
+
+      <UploadMusicDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onUploadSuccess={handleUploadSuccess}
+      />
     </div>
   );
 };

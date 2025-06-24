@@ -24,6 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = "https://pmrqueeoojexmuuyefba.supabase.co";
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
     
     if (!supabaseServiceKey) {
       throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY');
@@ -33,9 +34,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { orderId, userEmail, userName, fanCardTitle, quantity, totalAmount }: OrderNotificationRequest = await req.json();
 
-    // Here you would integrate with your email service (like Resend)
-    // For now, we'll just log the notification and update the order status
-    
     console.log('Order notification request:', {
       orderId,
       userEmail,
@@ -44,6 +42,64 @@ const handler = async (req: Request): Promise<Response> => {
       quantity,
       totalAmount
     });
+
+    // Prepare email content
+    const emailSubject = "Thank you for your Fan Card order!";
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Thank you for your order!</h2>
+        
+        <p>Dear ${userName || 'Customer'},</p>
+        
+        <p>Thank you for ordering our Fan Cards! We have received your request for:</p>
+        
+        <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Item:</strong> ${quantity} x ${fanCardTitle}</p>
+          <p><strong>Total:</strong> $${totalAmount}</p>
+          <p><strong>Order ID:</strong> ${orderId}</p>
+        </div>
+        
+        <p>Someone from our team will be in touch with you within the next 48 hours with further details and shipping information.</p>
+        
+        <p>If you have any questions, please don't hesitate to contact us.</p>
+        
+        <p>Best regards,<br>
+        The Fan Cards Team</p>
+      </div>
+    `;
+
+    // Send email using Resend if API key is available
+    if (resendApiKey) {
+      try {
+        const emailResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Fan Cards <orders@resend.dev>',
+            to: [userEmail],
+            subject: emailSubject,
+            html: emailContent,
+          }),
+        });
+
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.text();
+          console.error('Resend API error:', errorData);
+          throw new Error(`Resend API error: ${emailResponse.status}`);
+        }
+
+        const emailResult = await emailResponse.json();
+        console.log('Email sent successfully:', emailResult);
+      } catch (emailError) {
+        console.error('Failed to send email via Resend:', emailError);
+        // Continue with the process even if email fails
+      }
+    } else {
+      console.log('RESEND_API_KEY not configured, email content prepared:', emailContent);
+    }
 
     // Update the order to mark email as sent
     const { error: updateError } = await supabase
@@ -58,30 +114,12 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
-    // In a real implementation, you would send an email here
-    // Example email content:
-    const emailContent = `
-      Dear ${userName || 'Customer'},
-      
-      Thank you for your order! We have received your request for ${quantity} x ${fanCardTitle}.
-      
-      Order Total: $${totalAmount}
-      
-      We are currently working on your request. One of our team members will reach out to you via email within the next 48 hours with further details and shipping information.
-      
-      If you have any questions, please don't hesitate to contact us.
-      
-      Best regards,
-      The Team
-    `;
-
-    console.log('Email content prepared:', emailContent);
-
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Notification sent successfully',
-        orderId 
+        orderId,
+        emailSent: !!resendApiKey
       }),
       {
         status: 200,
