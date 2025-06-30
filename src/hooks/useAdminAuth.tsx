@@ -23,8 +23,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // First check if the user's email is the authorized super admin email
-      if (user.email !== 'sarthakparikh20010409@gmail.com') {
+      // Check if the user's email is one of the authorized super admin emails
+      const authorizedEmails = ['sarthakparikh20010409@gmail.com', 'sdotsamuel@gmail.com'];
+      if (!authorizedEmails.includes(user.email || '')) {
         setIsSuperAdmin(false);
         setIsLoading(false);
         return;
@@ -40,7 +41,7 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
           setIsSuperAdmin(false);
         } else {
           // User must have both the correct email AND the super_admin role in the database
-          setIsSuperAdmin(data === true && user.email === 'sarthakparikh20010409@gmail.com');
+          setIsSuperAdmin(data === true && authorizedEmails.includes(user.email || ''));
         }
       } catch (error) {
         console.error('Error checking super admin status:', error);
