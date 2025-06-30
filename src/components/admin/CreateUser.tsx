@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,14 +49,15 @@ const CreateUser: React.FC = () => {
     }
 
     try {
-      // Create demo super user
-      const { data, error } = await supabase.auth.admin.createUser({
+      // Create demo super user using regular signup
+      const { data, error } = await supabase.auth.signUp({
         email: demoEmail,
         password: demoPassword,
-        email_confirm: true,
-        user_metadata: {
-          artist_name: demoArtistName,
-          role: 'super_admin'
+        options: {
+          data: {
+            artist_name: demoArtistName,
+            role: 'super_admin'
+          }
         }
       });
 
@@ -87,14 +87,15 @@ const CreateUser: React.FC = () => {
     setLoading(true);
 
     try {
-      // Create user with Supabase Auth Admin API
-      const { data, error } = await supabase.auth.admin.createUser({
+      // Create user with regular signup
+      const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        email_confirm: true,
-        user_metadata: {
-          artist_name: formData.artistName,
-          role: formData.role
+        options: {
+          data: {
+            artist_name: formData.artistName,
+            role: formData.role
+          }
         }
       });
 
@@ -132,14 +133,15 @@ const CreateUser: React.FC = () => {
     const demoArtistName = 'Demo Super Admin';
 
     try {
-      // Create demo super user
-      const { data, error } = await supabase.auth.admin.createUser({
+      // Create demo super user using regular signup
+      const { data, error } = await supabase.auth.signUp({
         email: demoEmail,
         password: demoPassword,
-        email_confirm: true,
-        user_metadata: {
-          artist_name: demoArtistName,
-          role: 'super_admin'
+        options: {
+          data: {
+            artist_name: demoArtistName,
+            role: 'super_admin'
+          }
         }
       });
 

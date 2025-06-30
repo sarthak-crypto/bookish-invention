@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,7 +5,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Album, CreditCard, Plus, ShoppingCart, Video, Upload, Settings, BarChart3 } from 'lucide-react';
+import { Music, Album, CreditCard, Plus, ShoppingCart, Video, Upload, Settings, BarChart3, Palette } from 'lucide-react';
 
 // Import our components
 import UploadMusic from '@/components/music/UploadMusic';
@@ -19,6 +18,7 @@ import CreateFanCard from '@/components/fancard/CreateFanCard';
 import MyFanCards from '@/components/fancard/MyFanCards';
 import FanCardMarketplace from '@/components/fancard/FanCardMarketplace';
 import ArtistAnalyticsDashboard from '@/components/analytics/ArtistAnalyticsDashboard';
+import LandingPageDesigner from '@/components/landingpage/LandingPageDesigner';
 
 const DashboardPage: React.FC = () => {
   const { user, isLoading, signOut } = useAuth();
@@ -72,7 +72,7 @@ const DashboardPage: React.FC = () => {
         <p className="text-xl mb-8 text-foreground">Welcome, {user.email}!</p>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="analytics" className="flex items-center justify-center gap-2">
               <BarChart3 className="h-4 w-4" /> Analytics
             </TabsTrigger>
@@ -90,6 +90,9 @@ const DashboardPage: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="albums" className="flex items-center justify-center gap-2">
               <Album className="h-4 w-4" /> Albums
+            </TabsTrigger>
+            <TabsTrigger value="landing-pages" className="flex items-center justify-center gap-2">
+              <Palette className="h-4 w-4" /> Landing Pages
             </TabsTrigger>
             <TabsTrigger value="fan-cards" className="flex items-center justify-center gap-2">
               <CreditCard className="h-4 w-4" /> My Fan Cards
@@ -122,6 +125,10 @@ const DashboardPage: React.FC = () => {
           <TabsContent value="albums" className="space-y-4 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <CreateAlbum />
             <AlbumManager />
+          </TabsContent>
+
+          <TabsContent value="landing-pages" className="space-y-4">
+            <LandingPageDesigner />
           </TabsContent>
 
           <TabsContent value="fan-cards" className="space-y-4 grid grid-cols-1 lg:grid-cols-2 gap-8">

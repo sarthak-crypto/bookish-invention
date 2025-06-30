@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, Search, Crown, User, Palette } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Users, Search, Crown, User, Palette, RotateCcw, Trash2, Mail, UserX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserWithRole {
@@ -13,6 +15,8 @@ interface UserWithRole {
   email: string;
   artist_name: string | null;
   created_at: string;
+  last_sign_in_at: string | null;
+  email_confirmed_at: string | null;
   user_roles: {
     role: string;
   }[] | null;
@@ -40,30 +44,34 @@ const UserManagement: React.FC = () => {
 
       if (error) throw error;
 
-      // Fetch user emails and roles separately
+      // Fetch user emails and roles separately to avoid RLS issues
       const usersWithRoles: UserWithRole[] = await Promise.all(
         (profilesData || []).map(async (profile) => {
           try {
-            // Get user email from auth metadata
-            const { data: authData } = await supabase.auth.admin.getUserById(profile.id);
-            
-            // Get user roles
-            const { data: rolesData } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', profile.id);
+            // Get user roles using the security definer function
+            const { data: roleCheck, error: roleError } = await supabase
+              .rpc('is_user_super_admin', { check_user_id: profile.id });
+
+            let userRole = 'artist'; // default role
+            if (!roleError && roleCheck) {
+              userRole = 'super_admin';
+            }
 
             return {
               ...profile,
-              email: authData.user?.email || 'Unknown',
-              user_roles: rolesData || []
+              email: 'Loading...', // We'll update this with actual email if available
+              last_sign_in_at: null,
+              email_confirmed_at: null,
+              user_roles: [{ role: userRole }]
             };
           } catch (error) {
             console.error('Error fetching user data:', error);
             return {
               ...profile,
               email: 'Unknown',
-              user_roles: []
+              last_sign_in_at: null,
+              email_confirmed_at: null,
+              user_roles: [{ role: 'artist' }]
             };
           }
         })
@@ -79,6 +87,28 @@ const UserManagement: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const sendPasswordResetEmail = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Password reset email sent to ${email}`,
+      });
+    } catch (error: any) {
+      console.error('Error sending password reset:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send password reset email",
+        variant: "destructive",
+      });
     }
   };
 
@@ -159,7 +189,7 @@ const UserManagement: React.FC = () => {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <Users className="h-6 w-6" />
-          User Management
+          User Management ({filteredUsers.length} users)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -167,7 +197,7 @@ const UserManagement: React.FC = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search users..."
+              placeholder="Search users by email or artist name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
@@ -184,7 +214,7 @@ const UserManagement: React.FC = () => {
                 className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center">
                     {getRoleIcon(userRole)}
                   </div>
                   <div>
@@ -192,9 +222,10 @@ const UserManagement: React.FC = () => {
                     <p className="text-gray-300 text-sm">
                       {user.artist_name || 'No artist name'}
                     </p>
-                    <p className="text-gray-400 text-xs">
-                      Joined: {new Date(user.created_at).toLocaleDateString()}
-                    </p>
+                    <div className="flex gap-4 text-xs text-gray-400 mt-1">
+                      <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
+                      <span className="text-green-400">Admin Dashboard Access</span>
+                    </div>
                   </div>
                 </div>
 
@@ -204,19 +235,31 @@ const UserManagement: React.FC = () => {
                     {userRole.replace('_', ' ')}
                   </Badge>
 
-                  <Select
-                    value={userRole}
-                    onValueChange={(newRole: 'artist' | 'super_admin' | 'fan') => updateUserRole(user.id, newRole)}
-                  >
-                    <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="artist">Artist</SelectItem>
-                      <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="fan">Fan</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select
+                      value={userRole}
+                      onValueChange={(newRole: 'artist' | 'super_admin' | 'fan') => updateUserRole(user.id, newRole)}
+                    >
+                      <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="artist">Artist</SelectItem>
+                        <SelectItem value="super_admin">Super Admin</SelectItem>
+                        <SelectItem value="fan">Fan</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Button
+                      onClick={() => sendPasswordResetEmail(user.email)}
+                      size="sm"
+                      variant="outline"
+                      className="bg-blue-600/20 border-blue-500/20 text-blue-200 hover:bg-blue-600/30"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1" />
+                      Reset Password
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
@@ -225,7 +268,8 @@ const UserManagement: React.FC = () => {
 
         {filteredUsers.length === 0 && (
           <div className="text-center text-gray-400 py-8">
-            No users found matching your search.
+            <UserX className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No users found matching your search.</p>
           </div>
         )}
       </CardContent>

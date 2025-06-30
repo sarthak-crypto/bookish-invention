@@ -50,6 +50,50 @@ export type Database = {
           },
         ]
       }
+      album_landing_pages: {
+        Row: {
+          album_id: string
+          created_at: string
+          elements: Json
+          id: string
+          is_published: boolean
+          theme: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          album_id: string
+          created_at?: string
+          elements?: Json
+          id?: string
+          is_published?: boolean
+          theme?: Json
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          album_id?: string
+          created_at?: string
+          elements?: Json
+          id?: string
+          is_published?: boolean
+          theme?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_landing_pages_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: true
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       albums: {
         Row: {
           artwork_url: string | null
@@ -229,6 +273,36 @@ export type Database = {
         }
         Relationships: []
       }
+      end_user_sessions: {
+        Row: {
+          album_id: string
+          card_id: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          location: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          album_id: string
+          card_id: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          location?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          album_id?: string
+          card_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          location?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       fan_cards: {
         Row: {
           album_id: string
@@ -376,6 +450,36 @@ export type Database = {
           artist_name?: string | null
           created_at?: string
           id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rfid_cards: {
+        Row: {
+          album_id: string
+          card_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_accessed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          album_id: string
+          card_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          album_id?: string
+          card_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -528,6 +632,10 @@ export type Database = {
       }
       is_super_admin: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      is_user_super_admin: {
+        Args: { check_user_id: string }
         Returns: boolean
       }
     }

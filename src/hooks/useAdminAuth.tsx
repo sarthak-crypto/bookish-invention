@@ -23,19 +23,25 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      // First check if the user's email is the authorized super admin email
+      if (user.email !== 'sarthakparikh20010409@gmail.com') {
+        setIsSuperAdmin(false);
+        setIsLoading(false);
+        return;
+      }
+
       try {
+        // Use the security definer function to avoid RLS recursion
         const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'super_admin')
-          .single();
+          .rpc('is_user_super_admin', { check_user_id: user.id });
 
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('Error checking super admin status:', error);
+          setIsSuperAdmin(false);
+        } else {
+          // User must have both the correct email AND the super_admin role in the database
+          setIsSuperAdmin(data === true && user.email === 'sarthakparikh20010409@gmail.com');
         }
-
-        setIsSuperAdmin(!!data);
       } catch (error) {
         console.error('Error checking super admin status:', error);
         setIsSuperAdmin(false);

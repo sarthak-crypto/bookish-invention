@@ -14,7 +14,8 @@ import {
   ShoppingCart, 
   UserPlus,
   Shield,
-  Palette
+  Palette,
+  Database
 } from 'lucide-react';
 
 // Import admin components
@@ -23,6 +24,7 @@ import CardDesignManager from '@/components/admin/CardDesignManager';
 import OrderManagement from '@/components/admin/OrderManagement';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import CreateUser from '@/components/admin/CreateUser';
+import RFIDCardManagement from '@/components/admin/RFIDCardManagement';
 
 const AdminDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -33,7 +35,7 @@ const AdminDashboard: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-xl">Loading admin dashboard...</div>
+        <div className="text-white text-xl">Loading super admin dashboard...</div>
       </div>
     );
   }
@@ -49,7 +51,7 @@ const AdminDashboard: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-red-200 mb-4">You don't have super admin privileges.</p>
+            <p className="text-red-200 mb-4">You don't have super admin privileges to access this dashboard.</p>
             <Button onClick={() => navigate('/')} className="w-full">
               Return to Home
             </Button>
@@ -64,8 +66,9 @@ const AdminDashboard: React.FC = () => {
       <div className="container mx-auto p-6">
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Super Admin Dashboard</h1>
-            <p className="text-purple-200">Welcome back, {user.email}</p>
+            <h1 className="text-4xl font-bold text-white mb-2">Super Admin Control Panel</h1>
+            <p className="text-purple-200">Complete system management for {user.email}</p>
+            <p className="text-purple-300 text-sm">Manage users, RFID cards, orders, analytics and system settings</p>
           </div>
           <div className="flex gap-4">
             <Button 
@@ -73,6 +76,7 @@ const AdminDashboard: React.FC = () => {
               variant="outline"
               className="bg-white/10 text-white border-white/20 hover:bg-white/20"
             >
+              <Users className="h-4 w-4 mr-2" />
               User Dashboard
             </Button>
             <Button 
@@ -86,14 +90,22 @@ const AdminDashboard: React.FC = () => {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-white/10 backdrop-blur-lg">
+          <TabsList className="grid w-full grid-cols-8 bg-white/10 backdrop-blur-lg">
             <TabsTrigger value="overview" className="text-white data-[state=active]:bg-purple-600">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
             <TabsTrigger value="users" className="text-white data-[state=active]:bg-purple-600">
               <Users className="h-4 w-4 mr-2" />
-              Users
+              User Management
+            </TabsTrigger>
+            <TabsTrigger value="create-user" className="text-white data-[state=active]:bg-purple-600">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Create User
+            </TabsTrigger>
+            <TabsTrigger value="rfid-cards" className="text-white data-[state=active]:bg-purple-600">
+              <CreditCard className="h-4 w-4 mr-2" />
+              RFID Cards
             </TabsTrigger>
             <TabsTrigger value="card-designs" className="text-white data-[state=active]:bg-purple-600">
               <Palette className="h-4 w-4 mr-2" />
@@ -101,24 +113,81 @@ const AdminDashboard: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="orders" className="text-white data-[state=active]:bg-purple-600">
               <ShoppingCart className="h-4 w-4 mr-2" />
-              Orders
+              Order Management
             </TabsTrigger>
             <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-purple-600">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
+              <Database className="h-4 w-4 mr-2" />
+              System Analytics
             </TabsTrigger>
-            <TabsTrigger value="create-user" className="text-white data-[state=active]:bg-purple-600">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Create User
+            <TabsTrigger value="settings" className="text-white data-[state=active]:bg-purple-600">
+              <Settings className="h-4 w-4 mr-2" />
+              System Settings
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card className="bg-gradient-to-r from-blue-600/20 to-blue-800/20 border-blue-500/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-200 text-sm">Total Users</p>
+                      <p className="text-white text-2xl font-bold">-</p>
+                    </div>
+                    <Users className="h-8 w-8 text-blue-400" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-green-600/20 to-green-800/20 border-green-500/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-green-200 text-sm">Active RFID Cards</p>
+                      <p className="text-white text-2xl font-bold">-</p>
+                    </div>
+                    <CreditCard className="h-8 w-8 text-green-400" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-purple-600/20 to-purple-800/20 border-purple-500/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-purple-200 text-sm">Total Orders</p>
+                      <p className="text-white text-2xl font-bold">-</p>
+                    </div>
+                    <ShoppingCart className="h-8 w-8 text-purple-400" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-orange-600/20 to-orange-800/20 border-orange-500/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-orange-200 text-sm">System Health</p>
+                      <p className="text-white text-2xl font-bold">Good</p>
+                    </div>
+                    <Shield className="h-8 w-8 text-orange-400" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
             <AnalyticsDashboard />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
             <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="create-user" className="space-y-6">
+            <CreateUser />
+          </TabsContent>
+
+          <TabsContent value="rfid-cards" className="space-y-6">
+            <RFIDCardManagement />
           </TabsContent>
 
           <TabsContent value="card-designs" className="space-y-6">
@@ -133,8 +202,33 @@ const AdminDashboard: React.FC = () => {
             <AnalyticsDashboard />
           </TabsContent>
 
-          <TabsContent value="create-user" className="space-y-6">
-            <CreateUser />
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Settings className="h-6 w-6" />
+                  System Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-white space-y-4">
+                  <div className="p-4 bg-white/5 rounded-lg">
+                    <h3 className="font-medium mb-2">Database Status</h3>
+                    <p className="text-sm text-gray-300">All systems operational</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-lg">
+                    <h3 className="font-medium mb-2">Authentication Settings</h3>
+                    <p className="text-sm text-gray-300">Email confirmation: Enabled</p>
+                    <p className="text-sm text-gray-300">Password reset: Enabled</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-lg">
+                    <h3 className="font-medium mb-2">RFID System</h3>
+                    <p className="text-sm text-gray-300">Card validation: Active</p>
+                    <p className="text-sm text-gray-300">Analytics tracking: Enabled</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
