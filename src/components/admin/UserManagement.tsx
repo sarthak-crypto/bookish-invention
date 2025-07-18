@@ -34,6 +34,7 @@ const UserManagement: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
+      // First get all profiles
       const { data: profilesData, error } = await supabase
         .from('profiles')
         .select(`
@@ -44,38 +45,37 @@ const UserManagement: React.FC = () => {
 
       if (error) throw error;
 
-      // Fetch user emails and roles separately to avoid RLS issues
-      const usersWithRoles: UserWithRole[] = await Promise.all(
-        (profilesData || []).map(async (profile) => {
-          try {
-            // Get user roles using the security definer function
-            const { data: roleCheck, error: roleError } = await supabase
-              .rpc('is_user_super_admin', { check_user_id: profile.id });
+      // Get user roles for all users
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
 
-            let userRole = 'artist'; // default role
-            if (!roleError && roleCheck) {
-              userRole = 'super_admin';
-            }
+      if (rolesError) {
+        console.warn('Error fetching roles:', rolesError);
+      }
 
-            return {
-              ...profile,
-              email: 'Loading...', // We'll update this with actual email if available
-              last_sign_in_at: null,
-              email_confirmed_at: null,
-              user_roles: [{ role: userRole }]
-            };
-          } catch (error) {
-            console.error('Error fetching user data:', error);
-            return {
-              ...profile,
-              email: 'Unknown',
-              last_sign_in_at: null,
-              email_confirmed_at: null,
-              user_roles: [{ role: 'artist' }]
-            };
-          }
-        })
-      );
+      // Create a roles map for quick lookup
+      const rolesMap = (rolesData || []).reduce((acc, roleData) => {
+        acc[roleData.user_id] = roleData.role;
+        return acc;
+      }, {} as Record<string, string>);
+
+      // Map profiles with roles and construct user objects
+      const usersWithRoles: UserWithRole[] = (profilesData || []).map((profile) => {
+        const userRole = rolesMap[profile.id] || 'artist'; // default role
+        
+        // For demo purposes, we'll use a simple email format
+        // In a real app, you'd need to fetch this from auth metadata or store it in profiles
+        const email = `user-${profile.id.slice(0, 8)}@example.com`;
+        
+        return {
+          ...profile,
+          email,
+          last_sign_in_at: null,
+          email_confirmed_at: null,
+          user_roles: [{ role: userRole }]
+        };
+      });
 
       setUsers(usersWithRoles);
     } catch (error) {

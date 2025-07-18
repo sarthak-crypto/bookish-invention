@@ -9,9 +9,11 @@ import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
+import AlbumsPage from "./pages/AlbumsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import EndUserPage from "./pages/EndUserPage";
 import AlbumPreviewPage from "./pages/AlbumPreviewPage";
+import PublicArtistPage from "./pages/PublicArtistPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,9 +30,11 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/albums" element={<AlbumsPage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/listen" element={<EndUserPage />} />
               <Route path="/album-preview/:albumId" element={<AlbumPreviewPage />} />
+              <Route path="/artist/:artistId" element={<PublicArtistPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AdminAuthProvider>

@@ -108,6 +108,20 @@ const FanCardMarketplace: React.FC = () => {
 
       if (orderError) throw orderError;
 
+      // Track order creation analytics
+      await supabase
+        .from('analytics_events')
+        .insert({
+          event_type: 'order_created',
+          metadata: { 
+            order_id: orderData.id, 
+            fan_card_id: fanCard.id,
+            total_amount: fanCard.price,
+            album_title: fanCard.albums?.title
+          },
+          user_id: user.id
+        });
+
       // Get user profile for the email
       const { data: profileData } = await supabase
         .from('profiles')

@@ -55,7 +55,7 @@ const UploadVideo: React.FC = () => {
       // Upload video file
       const videoFileName = `${user.id}/${Date.now()}_${videoFile.name}`;
       const { data: videoData, error: videoError } = await supabase.storage
-        .from('videos')
+        .from('video-files')
         .upload(videoFileName, videoFile);
 
       if (videoError) throw videoError;
@@ -65,13 +65,13 @@ const UploadVideo: React.FC = () => {
         // Upload thumbnail
         const thumbnailFileName = `${user.id}/thumbnails/${Date.now()}_${thumbnailFile.name}`;
         const { data: thumbnailData, error: thumbnailError } = await supabase.storage
-          .from('videos')
+          .from('video-files')
           .upload(thumbnailFileName, thumbnailFile);
 
         if (thumbnailError) throw thumbnailError;
 
         const { data: { publicUrl: thumbnailPublicUrl } } = supabase.storage
-          .from('videos')
+          .from('video-files')
           .getPublicUrl(thumbnailData.path);
         
         thumbnailUrl = thumbnailPublicUrl;
@@ -79,7 +79,7 @@ const UploadVideo: React.FC = () => {
 
       // Get video file URL
       const { data: { publicUrl } } = supabase.storage
-        .from('videos')
+        .from('video-files')
         .getPublicUrl(videoData.path);
 
       // Save video metadata to database
@@ -89,11 +89,23 @@ const UploadVideo: React.FC = () => {
           user_id: user.id,
           title,
           file_url: publicUrl,
-          thumbnail_url: thumbnailUrl,
-          associated_track_id: selectedTrackId === 'none' ? null : selectedTrackId
+          thumbnail_url: thumbnailUrl
         });
 
       if (dbError) throw dbError;
+
+      // Track video upload analytics
+      await supabase
+        .from('analytics_events')
+        .insert({
+          event_type: 'video_uploaded',
+          metadata: { 
+            video_title: title,
+            has_thumbnail: !!thumbnailUrl,
+            file_size: videoFile.size 
+          },
+          user_id: user.id
+        });
 
       toast({
         title: "Success",
@@ -182,6 +194,9 @@ const UploadVideo: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-sm text-muted-foreground mt-1">
+              Note: Video-track associations will be available in a future update.
+            </p>
           </div>
 
           <Button type="submit" disabled={uploading || !videoFile || !title}>

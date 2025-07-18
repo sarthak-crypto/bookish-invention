@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ShoppingCart, Package, DollarSign, TrendingUp } from 'lucide-react';
+import { ShoppingCart, Package, DollarSign, TrendingUp, Edit, CreditCard } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface Order {
@@ -14,6 +17,9 @@ interface Order {
   quantity: number;
   total_amount: number;
   status: string;
+  payment_id: string | null;
+  payment_method: string | null;
+  payment_status: string | null;
   shipping_address: any;
   created_at: string;
   fan_cards: {
@@ -31,6 +37,13 @@ interface Order {
 const OrderManagement: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [editForm, setEditForm] = useState({
+    payment_id: '',
+    payment_method: '',
+    payment_status: '',
+    total_amount: ''
+  });
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -118,6 +131,17 @@ const OrderManagement: React.FC = () => {
 
       if (error) throw error;
 
+      // Track analytics when order status changes
+      if (newStatus === 'completed') {
+        await supabase
+          .from('analytics_events')
+          .insert({
+            event_type: 'order_completed',
+            metadata: { order_id: orderId, status: newStatus },
+            user_id: null
+          });
+      }
+
       toast({
         title: "Success",
         description: `Order status updated to ${newStatus}`,
@@ -129,6 +153,49 @@ const OrderManagement: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to update order status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openEditDialog = (order: Order) => {
+    setEditingOrder(order);
+    setEditForm({
+      payment_id: order.payment_id || '',
+      payment_method: order.payment_method || '',
+      payment_status: order.payment_status || '',
+      total_amount: order.total_amount.toString()
+    });
+  };
+
+  const updateOrderDetails = async () => {
+    if (!editingOrder) return;
+
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          payment_id: editForm.payment_id || null,
+          payment_method: editForm.payment_method || null,
+          payment_status: editForm.payment_status || null,
+          total_amount: parseFloat(editForm.total_amount) || editingOrder.total_amount
+        })
+        .eq('id', editingOrder.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Order details updated successfully",
+      });
+
+      setEditingOrder(null);
+      fetchOrders(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating order details:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update order details",
         variant: "destructive",
       });
     }
@@ -244,11 +311,104 @@ const OrderManagement: React.FC = () => {
                     <p className="text-white font-medium">
                       ${order.total_amount} ({order.quantity} items)
                     </p>
+                    {order.payment_id && (
+                      <p className="text-gray-400 text-xs">
+                        Payment ID: {order.payment_id.slice(0, 10)}...
+                      </p>
+                    )}
+                    {order.payment_status && (
+                      <p className="text-gray-400 text-xs">
+                        Payment: {order.payment_status}
+                      </p>
+                    )}
                   </div>
 
                   <Badge variant={getStatusBadgeVariant(order.status)}>
                     {order.status}
                   </Badge>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                        onClick={() => openEditDialog(order)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-gray-900 border-gray-700">
+                      <DialogHeader>
+                        <DialogTitle className="text-white">Edit Order Details</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="payment_id" className="text-white">Payment ID</Label>
+                          <Input
+                            id="payment_id"
+                            value={editForm.payment_id}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, payment_id: e.target.value }))}
+                            className="bg-white/10 border-white/20 text-white"
+                            placeholder="Enter payment ID"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="payment_method" className="text-white">Payment Method</Label>
+                          <Select 
+                            value={editForm.payment_method} 
+                            onValueChange={(value) => setEditForm(prev => ({ ...prev, payment_method: value }))}
+                          >
+                            <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                              <SelectValue placeholder="Select payment method" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="credit_card">Credit Card</SelectItem>
+                              <SelectItem value="paypal">PayPal</SelectItem>
+                              <SelectItem value="stripe">Stripe</SelectItem>
+                              <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                              <SelectItem value="cash">Cash</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="payment_status" className="text-white">Payment Status</Label>
+                          <Select 
+                            value={editForm.payment_status} 
+                            onValueChange={(value) => setEditForm(prev => ({ ...prev, payment_status: value }))}
+                          >
+                            <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                              <SelectValue placeholder="Select payment status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="processing">Processing</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="failed">Failed</SelectItem>
+                              <SelectItem value="refunded">Refunded</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="total_amount" className="text-white">Total Amount ($)</Label>
+                          <Input
+                            id="total_amount"
+                            type="number"
+                            step="0.01"
+                            value={editForm.total_amount}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, total_amount: e.target.value }))}
+                            className="bg-white/10 border-white/20 text-white"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button onClick={updateOrderDetails} className="flex-1">
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Update Details
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
                   <Select
                     value={order.status}
