@@ -1,3 +1,5 @@
+
+/*
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,7 +86,7 @@ const DetailedAnalytics: React.FC = () => {
 
       // Fetch play analytics
       const { data: playData, error: playError } = await supabase
-        .rpc('get_artist_analytics', { artist_id: user?.id });
+        .rpc('get_client_analytics', { client_id: user?.id });
 
       if (playError) throw playError;
 
@@ -153,7 +155,6 @@ const DetailedAnalytics: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Card Analytics */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -193,7 +194,6 @@ const DetailedAnalytics: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Play Analytics */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -233,7 +233,6 @@ const DetailedAnalytics: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Audio Plays Breakdown */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -267,6 +266,23 @@ const DetailedAnalytics: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+export default DetailedAnalytics;
+*/
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+
+// Analytics functionality commented out for future use
+const DetailedAnalytics: React.FC = () => {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <p className="text-center text-muted-foreground">Detailed analytics feature is temporarily disabled.</p>
+      </CardContent>
+    </Card>
   );
 };
 

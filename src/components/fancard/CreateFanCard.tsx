@@ -23,7 +23,7 @@ const CreateFanCard: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [formData, setFormData] = useState({
     albumId: '',
-    price: '',
+    quantity: '1',
     description: '',
   });
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
@@ -71,7 +71,7 @@ const CreateFanCard: React.FC = () => {
           user_id: user.id,
           album_id: formData.albumId,
           artwork_url: artworkUrl,
-          price: parseFloat(formData.price),
+          quantity: parseInt(formData.quantity),
           description: formData.description,
         });
 
@@ -83,7 +83,7 @@ const CreateFanCard: React.FC = () => {
       });
 
       // Reset form
-      setFormData({ albumId: '', price: '', description: '' });
+      setFormData({ albumId: '', quantity: '1', description: '' });
       setArtworkFile(null);
     } catch (error) {
       console.error('Fan card creation error:', error);
@@ -136,14 +136,13 @@ const CreateFanCard: React.FC = () => {
             </div>
 
             <div>
-              <Label htmlFor="price">Price ($)</Label>
+              <Label htmlFor="quantity">Quantity</Label>
               <Input
-                id="price"
+                id="quantity"
                 type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                min="1"
+                value={formData.quantity}
+                onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
                 required
               />
             </div>

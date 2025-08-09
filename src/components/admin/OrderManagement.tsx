@@ -30,7 +30,7 @@ interface Order {
     } | null;
   } | null;
   profiles: {
-    artist_name: string | null;
+    client_name: string | null;
   } | null;
 }
 
@@ -78,19 +78,19 @@ const OrderManagement: React.FC = () => {
           try {
             const { data: profile } = await supabase
               .from('profiles')
-              .select('artist_name')
+              .select('client_name')
               .eq('id', order.user_id)
               .single();
 
             return {
               ...order,
-              profiles: profile || { artist_name: null }
+              profiles: profile || { client_name: null }
             };
           } catch (error) {
             console.error('Error fetching profile for order:', error);
             return {
               ...order,
-              profiles: { artist_name: null }
+              profiles: { client_name: null }
             };
           }
         })
@@ -298,7 +298,7 @@ const OrderManagement: React.FC = () => {
                       Album: {order.fan_cards?.albums?.title || 'Unknown Album'}
                     </p>
                     <p className="text-gray-300 text-sm">
-                      Artist: {order.profiles?.artist_name || 'Unknown Artist'}
+                      Client: {order.profiles?.client_name || 'Unknown Client'}
                     </p>
                     <p className="text-gray-400 text-xs">
                       {new Date(order.created_at).toLocaleDateString()}

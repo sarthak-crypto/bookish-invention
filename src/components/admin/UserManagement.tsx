@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 interface UserWithRole {
   id: string;
   email: string;
-  artist_name: string | null;
+  client_name: string | null;
   created_at: string;
   last_sign_in_at: string | null;
   email_confirmed_at: string | null;
@@ -39,7 +39,7 @@ const UserManagement: React.FC = () => {
         .from('profiles')
         .select(`
           id,
-          artist_name,
+          client_name,
           created_at
         `);
 
@@ -171,23 +171,23 @@ const UserManagement: React.FC = () => {
 
   const filteredUsers = users.filter(user =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.artist_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    user.client_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
     return (
-      <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
-          <div className="text-white text-center">Loading users...</div>
+          <div className="text-foreground text-center">Loading users...</div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+    <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
+        <CardTitle className="text-foreground-dark flex items-center gap-2">
           <Users className="h-6 w-6" />
           User Management ({filteredUsers.length} users)
         </CardTitle>
@@ -195,12 +195,12 @@ const UserManagement: React.FC = () => {
       <CardContent className="space-y-6">
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users by email or artist name..."
+              placeholder="Search users by email or client name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
@@ -211,20 +211,20 @@ const UserManagement: React.FC = () => {
             return (
               <div
                 key={user.id}
-                className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
+                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
                     {getRoleIcon(userRole)}
                   </div>
                   <div>
-                    <p className="text-white font-medium">{user.email}</p>
-                    <p className="text-gray-300 text-sm">
-                      {user.artist_name || 'No artist name'}
+                    <p className="text-foreground-dark font-medium">{user.email}</p>
+                    <p className="text-foreground text-sm">
+                      {user.client_name || 'No client name'}
                     </p>
-                    <div className="flex gap-4 text-xs text-gray-400 mt-1">
+                    <div className="flex gap-4 text-xs text-muted-foreground mt-1">
                       <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
-                      <span className="text-green-400">Admin Dashboard Access</span>
+                      <span className="text-green-600 font-medium">Admin Dashboard Access</span>
                     </div>
                   </div>
                 </div>
@@ -240,11 +240,11 @@ const UserManagement: React.FC = () => {
                       value={userRole}
                       onValueChange={(newRole: 'artist' | 'super_admin' | 'fan') => updateUserRole(user.id, newRole)}
                     >
-                      <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white text-xs">
+                      <SelectTrigger className="w-32 bg-background border-border text-foreground text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="artist">Artist</SelectItem>
+                        <SelectItem value="artist">Client</SelectItem>
                         <SelectItem value="super_admin">Super Admin</SelectItem>
                         <SelectItem value="fan">Fan</SelectItem>
                       </SelectContent>
@@ -254,7 +254,7 @@ const UserManagement: React.FC = () => {
                       onClick={() => sendPasswordResetEmail(user.email)}
                       size="sm"
                       variant="outline"
-                      className="bg-blue-600/20 border-blue-500/20 text-blue-200 hover:bg-blue-600/30"
+                      className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
                     >
                       <RotateCcw className="h-4 w-4 mr-1" />
                       Reset Password
@@ -267,7 +267,7 @@ const UserManagement: React.FC = () => {
         </div>
 
         {filteredUsers.length === 0 && (
-          <div className="text-center text-gray-400 py-8">
+          <div className="text-center text-muted-foreground py-8">
             <UserX className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No users found matching your search.</p>
           </div>

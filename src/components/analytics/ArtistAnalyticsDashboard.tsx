@@ -1,4 +1,5 @@
 
+/*
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +15,7 @@ interface AnalyticsData {
   unique_locations: number;
 }
 
-const ArtistAnalyticsDashboard: React.FC = () => {
+const ClientAnalyticsDashboard: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -29,7 +30,7 @@ const ArtistAnalyticsDashboard: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       const { data, error } = await supabase
-        .rpc('get_artist_analytics', { artist_id: user?.id });
+        .rpc('get_client_analytics', { client_id: user?.id });
 
       if (error) throw error;
       
@@ -138,4 +139,21 @@ const ArtistAnalyticsDashboard: React.FC = () => {
   );
 };
 
-export default ArtistAnalyticsDashboard;
+export default ClientAnalyticsDashboard;
+*/
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+
+// Analytics functionality commented out for future use
+const ClientAnalyticsDashboard: React.FC = () => {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <p className="text-center text-muted-foreground">Analytics feature is temporarily disabled.</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ClientAnalyticsDashboard;

@@ -1,115 +1,127 @@
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { UserPlus, Mail, Lock, User } from 'lucide-react';
 
-const signUpSchema = z.object({
-  artistName: z.string().min(2, { message: 'Artist name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-});
+export default function SignUpForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-type SignUpFormValues = z.infer<typeof signUpSchema>;
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-const SignUpForm: React.FC = () => {
-  const navigate = useNavigate();
-  const form = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      artistName: '',
-      email: '',
-      password: '',
-    },
-  });
-
-  const onSubmit = async (data: SignUpFormValues) => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
         options: {
           data: {
-            artist_name: data.artistName,
+            client_name: clientName,
           },
         },
       });
+
       if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success('Sign up successful! Please check your email to verify your account.');
-        // Supabase handles email verification, user will be redirected by AuthProvider on SIGNED_IN if auto-confirm is on
-        // Or they will need to click verification link.
-        // For now, we assume they will be redirected or will log in after verification.
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Success!",
+          description: "Please check your email to confirm your account.",
+        });
+        
+        // Clear form
+        setEmail('');
+        setPassword('');
+        setClientName('');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred.');
       console.error('Sign up error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="artistName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Artist Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Your Artist Name" {...field} className="text-foreground-dark bg-background/70 border-primary/50 focus:border-primary" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="you@example.com" {...field} className="text-foreground-dark bg-background/70 border-primary/50 focus:border-primary" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} className="text-foreground-dark bg-background/70 border-primary/50 focus:border-primary" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Signing Up...' : 'Sign Up'}
-        </Button>
-      </form>
-    </Form>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
+          <UserPlus className="h-6 w-6" />
+          Sign Up
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSignUp} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="clientName" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Client Name
+            </Label>
+            <Input
+              id="clientName"
+              type="text"
+              placeholder="Enter your client name"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="password" className="flex items-center gap-2">
+              <Lock className="h-4 w-4" />
+              Password
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
-};
-
-export default SignUpForm;
+}

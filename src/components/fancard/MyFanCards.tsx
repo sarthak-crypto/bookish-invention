@@ -3,13 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CreditCard, Edit, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface FanCard {
   id: string;
   album_id: string;
   artwork_url: string;
-  price: number;
+  quantity: number;
   description: string | null;
   created_at: string;
   albums?: {
@@ -19,6 +21,7 @@ interface FanCard {
 
 const MyFanCards: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [fanCards, setFanCards] = useState<FanCard[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,6 +50,34 @@ const MyFanCards: React.FC = () => {
       console.error('Error fetching fan cards:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (cardId: string) => {
+    if (!confirm('Are you sure you want to delete this fan card?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('fan_cards')
+        .delete()
+        .eq('id', cardId)
+        .eq('user_id', user?.id); // Ensure user can only delete their own cards
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Fan card deleted successfully.",
+      });
+
+      fetchFanCards(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting fan card:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete fan card. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -87,9 +118,22 @@ const MyFanCards: React.FC = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     {card.description || "No description"}
                   </p>
-                  <p className="font-bold text-foreground-dark">
-                    ${card.price.toFixed(2)}
+                  <p className="font-bold text-primary mb-3">
+                    Quantity: {card.quantity}
                   </p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDelete(card.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}

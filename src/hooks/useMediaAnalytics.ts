@@ -1,4 +1,5 @@
 
+/*
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -65,6 +66,17 @@ export const useMediaAnalytics = () => {
     } catch (error) {
       console.error('Failed to track media play:', error);
     }
+  };
+
+  return { trackMediaPlay };
+};
+*/
+
+// Analytics functionality commented out for future use
+export const useMediaAnalytics = () => {
+  const trackMediaPlay = async (data: any) => {
+    // Analytics disabled - no tracking performed
+    return;
   };
 
   return { trackMediaPlay };

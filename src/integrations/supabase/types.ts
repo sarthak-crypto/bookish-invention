@@ -127,12 +127,20 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_albums_user_profiles"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       albums_analytics: {
         Row: {
           album_id: string
-          artist_name: string | null
+          client_name: string | null
           created_at: string
           id: string
           last_played_at: string | null
@@ -144,7 +152,7 @@ export type Database = {
         }
         Insert: {
           album_id: string
-          artist_name?: string | null
+          client_name?: string | null
           created_at?: string
           id?: string
           last_played_at?: string | null
@@ -156,7 +164,7 @@ export type Database = {
         }
         Update: {
           album_id?: string
-          artist_name?: string | null
+          client_name?: string | null
           created_at?: string
           id?: string
           last_played_at?: string | null
@@ -191,6 +199,77 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      artists: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audio_tracks: {
+        Row: {
+          artist_id: string
+          audio_url: string
+          cover_image_url: string | null
+          created_at: string
+          duration: number | null
+          has_shopping_cart: boolean | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          audio_url: string
+          cover_image_url?: string | null
+          created_at?: string
+          duration?: number | null
+          has_shopping_cart?: boolean | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          audio_url?: string
+          cover_image_url?: string | null
+          created_at?: string
+          duration?: number | null
+          has_shopping_cart?: boolean | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_tracks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       card_designs: {
         Row: {
@@ -354,7 +433,9 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
-          price: number
+          purchased: boolean | null
+          quantity: number
+          status: string | null
           updated_at: string
           user_id: string
         }
@@ -364,7 +445,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          price?: number
+          purchased?: boolean | null
+          quantity?: number
+          status?: string | null
           updated_at?: string
           user_id: string
         }
@@ -374,7 +457,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          price?: number
+          purchased?: boolean | null
+          quantity?: number
+          status?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -457,6 +542,60 @@ export type Database = {
         }
         Relationships: []
       }
+      nfc_cards: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          price: number
+          shop_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          price: number
+          shop_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          price?: number
+          shop_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nfc_sessions: {
+        Row: {
+          card_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          session_token: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          session_token: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token?: string
+        }
+        Relationships: []
+      }
       nfc_usage_analytics: {
         Row: {
           album_id: string
@@ -509,7 +648,7 @@ export type Database = {
           quantity: number
           shipping_address: Json | null
           status: string
-          total_amount: number
+          total_amount: number | null
           updated_at: string
           user_id: string
         }
@@ -525,7 +664,7 @@ export type Database = {
           quantity?: number
           shipping_address?: Json | null
           status?: string
-          total_amount: number
+          total_amount?: number | null
           updated_at?: string
           user_id: string
         }
@@ -541,7 +680,7 @@ export type Database = {
           quantity?: number
           shipping_address?: Json | null
           status?: string
-          total_amount?: number
+          total_amount?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -616,19 +755,19 @@ export type Database = {
       }
       profiles: {
         Row: {
-          artist_name: string | null
+          client_name: string | null
           created_at: string
           id: string
           updated_at: string
         }
         Insert: {
-          artist_name?: string | null
+          client_name?: string | null
           created_at?: string
           id: string
           updated_at?: string
         }
         Update: {
-          artist_name?: string | null
+          client_name?: string | null
           created_at?: string
           id?: string
           updated_at?: string
@@ -662,6 +801,33 @@ export type Database = {
           is_active?: boolean
           last_accessed_at?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      social_links: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          platform: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          platform: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          platform?: string
+          updated_at?: string
+          url?: string
         }
         Relationships: []
       }
@@ -862,6 +1028,47 @@ export type Database = {
         }
         Relationships: []
       }
+      video_tracks: {
+        Row: {
+          artist_id: string
+          created_at: string
+          duration: number | null
+          id: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          duration?: number | null
+          id?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          duration?: number | null
+          id?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_tracks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       videos: {
         Row: {
           created_at: string
@@ -900,8 +1107,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_artist_analytics: {
-        Args: { artist_id: string }
+      get_client_analytics: {
+        Args: { client_id: string }
         Returns: {
           total_plays: number
           weekly_plays: number

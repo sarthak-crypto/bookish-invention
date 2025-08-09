@@ -1,4 +1,5 @@
 
+/*
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,9 +115,9 @@ const AnalyticsDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
-          <div className="text-white text-center">Loading analytics...</div>
+          <div className="text-foreground text-center">Loading analytics...</div>
         </CardContent>
       </Card>
     );
@@ -124,98 +125,96 @@ const AnalyticsDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <Card className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 border-blue-500/20">
+        <Card className="bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-blue-400" />
+            <CardTitle className="text-sm font-medium text-blue-800">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{analytics.totalUsers}</div>
+            <div className="text-2xl font-bold text-blue-900">{analytics.totalUsers}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-600/20 to-green-800/20 border-green-500/20">
+        <Card className="bg-gradient-to-br from-green-100 to-green-200 border-green-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Tracks</CardTitle>
-            <Music className="h-4 w-4 text-green-400" />
+            <CardTitle className="text-sm font-medium text-green-800">Tracks</CardTitle>
+            <Music className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{analytics.totalTracks}</div>
+            <div className="text-2xl font-bold text-green-900">{analytics.totalTracks}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 border-purple-500/20">
+        <Card className="bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Videos</CardTitle>
-            <Video className="h-4 w-4 text-purple-400" />
+            <CardTitle className="text-sm font-medium text-purple-800">Videos</CardTitle>
+            <Video className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{analytics.totalVideos}</div>
+            <div className="text-2xl font-bold text-purple-900">{analytics.totalVideos}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 border-yellow-500/20">
+        <Card className="bg-gradient-to-br from-yellow-100 to-yellow-200 border-yellow-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Fan Cards</CardTitle>
-            <CreditCard className="h-4 w-4 text-yellow-400" />
+            <CardTitle className="text-sm font-medium text-yellow-800">Fan Cards</CardTitle>
+            <CreditCard className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{analytics.totalFanCards}</div>
+            <div className="text-2xl font-bold text-yellow-900">{analytics.totalFanCards}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-600/20 to-red-800/20 border-red-500/20">
+        <Card className="bg-gradient-to-br from-red-100 to-red-200 border-red-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Orders</CardTitle>
-            <TrendingUp className="h-4 w-4 text-red-400" />
+            <CardTitle className="text-sm font-medium text-red-800">Orders</CardTitle>
+            <TrendingUp className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{analytics.totalOrders}</div>
+            <div className="text-2xl font-bold text-red-900">{analytics.totalOrders}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-indigo-600/20 to-indigo-800/20 border-indigo-500/20">
+        <Card className="bg-gradient-to-br from-indigo-100 to-indigo-200 border-indigo-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Revenue</CardTitle>
-            <BarChart3 className="h-4 w-4 text-indigo-400" />
+            <CardTitle className="text-sm font-medium text-indigo-800">Revenue</CardTitle>
+            <BarChart3 className="h-4 w-4 text-indigo-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">${analytics.totalRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-indigo-900">${analytics.totalRevenue.toFixed(2)}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">User Growth</CardTitle>
+            <CardTitle className="text-foreground-dark">User Growth</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={analytics.userGrowth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                <XAxis dataKey="month" stroke="#ffffff60" />
-                <YAxis stroke="#ffffff60" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" stroke="hsl(var(--foreground))" />
+                <YAxis stroke="hsl(var(--foreground))" />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#1a1a2e', 
-                    border: '1px solid #ffffff20',
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    color: '#ffffff'
+                    color: 'hsl(var(--foreground))'
                   }} 
                 />
-                <Line type="monotone" dataKey="users" stroke="#8884d8" strokeWidth={2} />
+                <Line type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Content Distribution</CardTitle>
+            <CardTitle className="text-foreground-dark">Content Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -227,7 +226,7 @@ const AnalyticsDashboard: React.FC = () => {
                   labelLine={false}
                   label={({ name, value }) => `${name}: ${value}`}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="hsl(var(--primary))"
                   dataKey="value"
                 >
                   {analytics.contentByType.map((entry, index) => (
@@ -236,10 +235,10 @@ const AnalyticsDashboard: React.FC = () => {
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#1a1a2e', 
-                    border: '1px solid #ffffff20',
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    color: '#ffffff'
+                    color: 'hsl(var(--foreground))'
                   }} 
                 />
               </PieChart>
@@ -247,31 +246,48 @@ const AnalyticsDashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 lg:col-span-2">
+        <Card className="bg-card border-border lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-white">Revenue by Month</CardTitle>
+            <CardTitle className="text-foreground-dark">Revenue by Month</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={analytics.revenueByMonth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                <XAxis dataKey="month" stroke="#ffffff60" />
-                <YAxis stroke="#ffffff60" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" stroke="hsl(var(--foreground))" />
+                <YAxis stroke="hsl(var(--foreground))" />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#1a1a2e', 
-                    border: '1px solid #ffffff20',
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    color: '#ffffff'
+                    color: 'hsl(var(--foreground))'
                   }} 
                 />
-                <Bar dataKey="revenue" fill="#82ca9d" />
+                <Bar dataKey="revenue" fill="hsl(var(--accent))" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
     </div>
+  );
+};
+
+export default AnalyticsDashboard;
+*/
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+
+// Admin analytics dashboard commented out for future use
+const AnalyticsDashboard: React.FC = () => {
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-6">
+        <div className="text-foreground text-center">Admin analytics dashboard is temporarily disabled.</div>
+      </CardContent>
+    </Card>
   );
 };
 

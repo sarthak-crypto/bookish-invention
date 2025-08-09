@@ -17,14 +17,14 @@ interface RFIDCard {
   created_at: string;
   last_accessed_at: string | null;
   album_title?: string;
-  artist_name?: string;
+  client_name?: string;
 }
 
 interface Album {
   id: string;
   title: string;
   user_id: string;
-  artist_name?: string;
+  client_name?: string;
 }
 
 const RFIDCardManagement: React.FC = () => {
@@ -54,7 +54,7 @@ const RFIDCardManagement: React.FC = () => {
 
       if (cardsError) throw cardsError;
 
-      // Get album and artist info for each card
+      // Get album and client info for each card
       const cardsWithDetails = await Promise.all(
         (cards || []).map(async (card) => {
           const { data: album } = await supabase
@@ -63,20 +63,20 @@ const RFIDCardManagement: React.FC = () => {
             .eq('id', card.album_id)
             .single();
 
-          let artistName = 'Unknown Artist';
+          let clientName = 'Unknown Client';
           if (album?.user_id) {
             const { data: profile } = await supabase
               .from('profiles')
-              .select('artist_name')
+              .select('client_name')
               .eq('id', album.user_id)
               .single();
-            artistName = profile?.artist_name || 'Unknown Artist';
+            clientName = profile?.client_name || 'Unknown Client';
           }
           
           return {
             ...card,
             album_title: album?.title || 'Unknown Album',
-            artist_name: artistName
+            client_name: clientName
           };
         })
       );
@@ -103,23 +103,23 @@ const RFIDCardManagement: React.FC = () => {
 
       if (error) throw error;
 
-      // Get artist names for albums
-      const albumsWithArtists = await Promise.all(
+      // Get client names for albums
+      const albumsWithClients = await Promise.all(
         (albumData || []).map(async (album) => {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('artist_name')
+            .select('client_name')
             .eq('id', album.user_id)
             .single();
           
           return {
             ...album,
-            artist_name: profile?.artist_name || 'Unknown Artist'
+            client_name: profile?.client_name || 'Unknown Client'
           };
         })
       );
 
-      setAlbums(albumsWithArtists);
+      setAlbums(albumsWithClients);
     } catch (error) {
       console.error('Error fetching albums:', error);
     }
@@ -241,7 +241,7 @@ const RFIDCardManagement: React.FC = () => {
   const filteredCards = rfidCards.filter(card =>
     card.card_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     card.album_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.artist_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    card.client_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
@@ -276,7 +276,7 @@ const RFIDCardManagement: React.FC = () => {
               <option value="">Choose an album...</option>
               {albums.map((album) => (
                 <option key={album.id} value={album.id} className="text-black">
-                  {album.title} - {album.artist_name}
+                  {album.title} - {album.client_name}
                 </option>
               ))}
             </select>
@@ -323,7 +323,7 @@ const RFIDCardManagement: React.FC = () => {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search cards, albums, or artists..."
+              placeholder="Search cards, albums, or clients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
@@ -347,7 +347,7 @@ const RFIDCardManagement: React.FC = () => {
                     <div>
                       <div className="font-medium text-white">{card.album_title}</div>
                       <div className="text-sm text-gray-300">
-                        Artist: {card.artist_name}
+                        Client: {card.client_name}
                       </div>
                       <div className="text-sm text-gray-400">
                         Card ID: {card.card_id}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,9 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Play, Music, User, ExternalLink, Calendar, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-interface Artist {
+interface Client {
   id: string;
-  artist_name: string;
+  client_name: string;
 }
 
 interface Album {
@@ -35,11 +36,11 @@ interface Track {
   duration: number;
 }
 
-const PublicArtistPage: React.FC = () => {
+const PublicClientPage: React.FC = () => {
   const { artistId } = useParams<{ artistId: string }>();
   const { toast } = useToast();
   
-  const [artist, setArtist] = useState<Artist | null>(null);
+  const [client, setClient] = useState<Client | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [bio, setBio] = useState<Bio | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -50,25 +51,25 @@ const PublicArtistPage: React.FC = () => {
 
   useEffect(() => {
     if (artistId) {
-      fetchArtistData();
+      fetchClientData();
     }
   }, [artistId]);
 
-  const fetchArtistData = async () => {
+  const fetchClientData = async () => {
     try {
       setLoading(true);
 
-      // Fetch artist profile
-      const { data: artistData, error: artistError } = await supabase
+      // Fetch client profile
+      const { data: clientData, error: clientError } = await supabase
         .from('profiles')
-        .select('id, artist_name')
+        .select('id, client_name')
         .eq('id', artistId)
         .single();
 
-      if (artistError) throw artistError;
-      setArtist(artistData);
+      if (clientError) throw clientError;
+      setClient(clientData);
 
-      // Fetch artist albums with track count
+      // Fetch client albums with track count
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
         .select(`
@@ -91,7 +92,7 @@ const PublicArtistPage: React.FC = () => {
 
       setAlbums(formattedAlbums);
 
-      // Fetch artist bio
+      // Fetch client bio
       const { data: bioData, error: bioError } = await supabase
         .from('user_bios')
         .select('header_1, header_2, content_1, content_2')
@@ -102,10 +103,10 @@ const PublicArtistPage: React.FC = () => {
       setBio(bioData);
 
     } catch (error) {
-      console.error('Error fetching artist data:', error);
+      console.error('Error fetching client data:', error);
       toast({
         title: "Error",
-        description: "Failed to load artist information.",
+        description: "Failed to load client information.",
         variant: "destructive",
       });
     } finally {
@@ -157,19 +158,19 @@ const PublicArtistPage: React.FC = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-lg text-muted-foreground">Loading artist profile...</p>
+          <p className="text-lg text-muted-foreground">Loading client profile...</p>
         </div>
       </div>
     );
   }
 
-  if (!artist) {
+  if (!client) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-6">
-            <h1 className="text-2xl font-bold mb-4">Artist Not Found</h1>
-            <p className="text-muted-foreground mb-4">The artist you're looking for doesn't exist.</p>
+            <h1 className="text-2xl font-bold mb-4">Client Not Found</h1>
+            <p className="text-muted-foreground mb-4">The client you're looking for doesn't exist.</p>
             <Link to="/">
               <Button>Return Home</Button>
             </Link>
@@ -186,9 +187,9 @@ const PublicArtistPage: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground-dark mb-2">
-              {artist.artist_name}
+              {client.client_name}
             </h1>
-            <p className="text-lg text-muted-foreground">Artist Profile</p>
+            <p className="text-lg text-muted-foreground">Client Profile</p>
           </div>
         </div>
       </div>
@@ -305,7 +306,7 @@ const PublicArtistPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  About {artist.artist_name}
+                  About {client.client_name}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -341,10 +342,10 @@ const PublicArtistPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Artist Stats */}
+            {/* Client Stats */}
             <Card>
               <CardHeader>
-                <CardTitle>Artist Stats</CardTitle>
+                <CardTitle>Client Stats</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -369,7 +370,7 @@ const PublicArtistPage: React.FC = () => {
       <footer className="bg-muted/30 border-t mt-12">
         <div className="container mx-auto px-4 py-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Powered by Artist Verse Echo
+            Powered by Client Verse Echo
           </p>
         </div>
       </footer>
@@ -377,4 +378,4 @@ const PublicArtistPage: React.FC = () => {
   );
 };
 
-export default PublicArtistPage;
+export default PublicClientPage;
