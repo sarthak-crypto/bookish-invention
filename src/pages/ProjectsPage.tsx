@@ -1,29 +1,43 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, Music } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Music, User, Calendar, MoreVertical, Trash2, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import CreateProjectForm from '@/components/project/CreateProjectForm';
+import EditProjectDialog from '@/components/project/EditProjectDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Project {
   id: string;
   title: string;
   description: string | null;
-  created_at: string;
   artwork_url: string | null;
-  track_count: number;
+  created_at: string;
+  user_id: string;
+  artist_name?: string | null;
+  artist_bio?: string | null;
+  track_count?: number;
+  video_count?: number;
 }
 
 const ProjectsPage: React.FC = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
-  
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -33,32 +47,42 @@ const ProjectsPage: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const { data: albumsData, error } = await supabase
+      // First get the albums
+      const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
-        .select(`
-          id,
-          title,
-          description,
-          created_at,
-          artwork_url,
-          tracks(count)
-        `)
+        .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (albumsError) throw albumsError;
 
-      const formattedProjects = albumsData?.map(album => ({
-        ...album,
-        track_count: album.tracks?.[0]?.count || 0
-      })) || [];
+      // Then get track counts for each album
+      const projectsWithCounts = await Promise.all(
+        (albumsData || []).map(async (project) => {
+          const { count: trackCount } = await supabase
+            .from('tracks')
+            .select('*', { count: 'exact', head: true })
+            .eq('album_id', project.id);
 
-      setProjects(formattedProjects);
+          const { count: videoCount } = await supabase
+            .from('videos')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', project.user_id);
+
+          return {
+            ...project,
+            track_count: trackCount || 0,
+            video_count: videoCount || 0,
+          };
+        })
+      );
+
+      setProjects(projectsWithCounts);
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast({
         title: "Error",
-        description: "Failed to load projects.",
+        description: "Failed to fetch projects",
         variant: "destructive",
       });
     } finally {
@@ -66,117 +90,171 @@ const ProjectsPage: React.FC = () => {
     }
   };
 
-  const handleProjectClick = (projectId: string) => {
-    navigate(`/project/${projectId}`);
+  const handleProjectCreated = () => {
+    setShowCreateForm(false);
+    fetchProjects();
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const handleProjectUpdated = () => {
+    setEditingProject(null);
+    fetchProjects();
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      const { error } = await supabase
+        .from('albums')
+        .delete()
+        .eq('id', projectId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Project deleted successfully",
+      });
+
+      fetchProjects();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
+    return <div>Loading projects...</div>;
+  }
+
+  if (showCreateForm) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mb-4"></div>
-          <p className="text-lg text-muted-foreground">Loading projects...</p>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Create New Project</h1>
+          <Button variant="outline" onClick={() => setShowCreateForm(false)}>
+            Back to Projects
+          </Button>
         </div>
+        <CreateProjectForm onProjectCreated={handleProjectCreated} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-r from-primary/20 to-accent/20 border-b">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground-dark mb-2">
-                My Projects
-              </h1>
-              <p className="text-lg text-muted-foreground">
-                Manage your music projects and fan cards
-              </p>
-            </div>
-            <Button 
-              onClick={() => navigate('/albums')}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">My Projects</h1>
+        <Button onClick={() => setShowCreateForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Project
+        </Button>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        {projects.length === 0 ? (
-          <div className="text-center py-12">
-            <Music className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-2xl font-semibold text-foreground-dark mb-2">
-              No projects yet
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Create your first music project to get started
+      {projects.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Create your first project to get started with sharing your music and videos.
             </p>
-            <Button 
-              onClick={() => navigate('/albums')}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
+            <Button onClick={() => setShowCreateForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Project
+              Create Your First Project
             </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {projects.map((project) => (
-              <Card 
-                key={project.id}
-                className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105"
-                onClick={() => handleProjectClick(project.id)}
-              >
-                <CardHeader className="p-0">
-                  {project.artwork_url ? (
-                    <img
-                      src={project.artwork_url}
-                      alt={project.title}
-                      className="w-full h-48 object-cover rounded-t-lg"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-muted flex items-center justify-center rounded-t-lg">
-                      <Music className="h-16 w-16 text-muted-foreground" />
-                    </div>
-                  )}
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg mb-2 line-clamp-1">
-                    {project.title}
-                  </CardTitle>
-                  {project.description && (
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {project.description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(project.created_at)}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Music className="h-3 w-3" />
-                      {project.track_count} tracks
-                    </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg truncate">{project.title}</CardTitle>
+                    {project.artist_name && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                        <User className="h-3 w-3" />
+                        <span className="truncate">{project.artist_name}</span>
+                      </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setEditingProject(project)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleDeleteProject(project.id)}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0" onClick={() => navigate(`/projects/${project.id}`)}>
+                {project.artwork_url && (
+                  <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
+                    <img 
+                      src={project.artwork_url} 
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                {project.description && (
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                    {project.description}
+                  </p>
+                )}
+
+                {project.artist_bio && (
+                  <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+                    {project.artist_bio}
+                  </p>
+                )}
+
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant="secondary">
+                    {project.track_count} tracks
+                  </Badge>
+                  <Badge variant="secondary">
+                    {project.video_count} videos
+                  </Badge>
+                </div>
+
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  <span>Created {new Date(project.created_at).toLocaleDateString()}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {editingProject && (
+        <EditProjectDialog
+          open={!!editingProject}
+          onOpenChange={(open) => !open && setEditingProject(null)}
+          project={editingProject}
+          onProjectUpdated={handleProjectUpdated}
+        />
+      )}
     </div>
   );
 };

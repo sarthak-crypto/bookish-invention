@@ -101,6 +101,8 @@ export type Database = {
       }
       albums: {
         Row: {
+          artist_bio: string | null
+          artist_name: string | null
           artwork_url: string | null
           created_at: string
           description: string | null
@@ -110,6 +112,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          artist_bio?: string | null
+          artist_name?: string | null
           artwork_url?: string | null
           created_at?: string
           description?: string | null
@@ -119,6 +123,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          artist_bio?: string | null
+          artist_name?: string | null
           artwork_url?: string | null
           created_at?: string
           description?: string | null

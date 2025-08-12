@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, ShoppingCart, Package, Edit, CreditCard } from 'lucide-react';
+import { ArrowLeft, Calendar, ShoppingCart, Package, Edit, CreditCard, MapPin, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import OrderCardsDialog from '@/components/order/OrderCardsDialog';
 import BuyMoreFanCardsDialog from '@/components/dashboard/BuyMoreFanCardsDialog';
@@ -60,7 +60,7 @@ const CardDetailPage: React.FC = () => {
       if (cardError) throw cardError;
       setFanCard(cardData);
 
-      // Fetch associated project/album details
+      // Fetch associated project details
       const { data: projectData, error: projectError } = await supabase
         .from('albums')
         .select('*')
@@ -83,7 +83,6 @@ const CardDetailPage: React.FC = () => {
   };
 
   const handleOrderComplete = () => {
-    // Refresh the card data to show updated status
     fetchCardData();
   };
 
@@ -106,6 +105,10 @@ const CardDetailPage: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const isCardApproved = (card: FanCard) => {
+    return card.status === 'completed' || card.status === 'shipped';
   };
 
   if (loading) {
@@ -160,7 +163,7 @@ const CardDetailPage: React.FC = () => {
                 src={fanCard.artwork_url}
                 alt="Fan card artwork"
                 className={`w-full aspect-square object-cover rounded-lg shadow-lg ${
-                  fanCard.status === 'pending' ? 'filter grayscale' : ''
+                  !isCardApproved(fanCard) ? 'filter grayscale' : ''
                 }`}
               />
             </div>
@@ -202,7 +205,6 @@ const CardDetailPage: React.FC = () => {
                   </Button>
                 )}
 
-                {/* New Buy More Cards button for the card owner */}
                 <Button
                   onClick={() => setBuyMoreDialogOpen(true)}
                   variant="outline"
@@ -231,7 +233,7 @@ const CardDetailPage: React.FC = () => {
 
       {/* Card Details */}
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Project Information */}
           <Card>
             <CardHeader>
@@ -265,7 +267,7 @@ const CardDetailPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Card Statistics */}
+          {/* Card Information */}
           <Card>
             <CardHeader>
               <CardTitle>Card Information</CardTitle>
@@ -287,16 +289,65 @@ const CardDetailPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Order History */}
+        {/* Rural Cards and Registered Cards Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          {/* Rural Cards Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Order History</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Rural Cards
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                No orders placed yet for this fan card.
+              <p className="text-muted-foreground mb-4">
+                Cards distributed in rural areas and remote locations.
               </p>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Total Rural Cards:</span>
+                  <span className="font-medium">0</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Active:</span>
+                  <span className="font-medium">0</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Last Activity:</span>
+                  <span className="font-medium">Never</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Registered Cards Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Registered Cards
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Cards that have been registered by end users.
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Total Registered:</span>
+                  <span className="font-medium">0</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Active Users:</span>
+                  <span className="font-medium">0</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Last Registration:</span>
+                  <span className="font-medium">Never</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -106,60 +106,6 @@ const DashboardPage = () => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Music className="h-5 w-5" />
-                    Quick Start
-                  </CardTitle>
-                  <CardDescription>Get started with your music journey</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button className="w-full" onClick={() => navigateToTab('music')}>
-                    Create Your First Album
-                  </Button>
-                  <Button variant="outline" className="w-full" onClick={() => navigateToTab('content')}>
-                    Upload Music
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Fan Engagement
-                  </CardTitle>
-                  <CardDescription>Connect with your audience</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button className="w-full" onClick={() => navigateToTab('fan-cards')}>
-                    Create Fan Cards
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Browse Marketplace
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Insights
-                  </CardTitle>
-                  <CardDescription>Track your performance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full" disabled>
-                    Analytics Coming Soon
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
             {/* Fan Cards Grid */}
             <OverviewFanCardsGrid />
 
@@ -198,13 +144,13 @@ const DashboardPage = () => {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Plus className="h-5 w-5 text-primary" />
-                        Create Album
+                        Create Project
                       </CardTitle>
-                      <CardDescription>Start creating your next album project</CardDescription>
+                      <CardDescription>Start creating your next project</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground">
-                        Set up a new album with cover art, track listings, and metadata.
+                        Set up a new project with cover art, track listings, and metadata.
                       </p>
                     </CardContent>
                   </Card>
@@ -228,13 +174,13 @@ const DashboardPage = () => {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Settings2 className="h-5 w-5 text-primary" />
-                        Manage Albums
+                        Manage Projects
                       </CardTitle>
-                      <CardDescription>Edit and organize your album collections</CardDescription>
+                      <CardDescription>Edit and organize your project collections</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground">
-                        Update album information, reorder tracks, and manage releases.
+                        Update project information, reorder tracks, and manage releases.
                       </p>
                     </CardContent>
                   </Card>
@@ -277,7 +223,7 @@ const DashboardPage = () => {
                   <CardContent className="flex flex-wrap gap-3">
                     <Button onClick={() => handleMusicCardClick('create-album')} className="flex items-center gap-2">
                       <Plus className="h-4 w-4" />
-                      Create New Album
+                      Create New Project
                     </Button>
                     <Button variant="outline" onClick={() => navigateToTab('content')} className="flex items-center gap-2">
                       <Upload className="h-4 w-4" />
