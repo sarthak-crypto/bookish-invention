@@ -25,6 +25,7 @@ interface Order {
   fan_cards: {
     id: string;
     artwork_url: string;
+    quantity: number;
     albums: {
       title: string;
     } | null;
@@ -65,6 +66,7 @@ const OrderManagement: React.FC = () => {
           fan_cards (
             id,
             artwork_url,
+            quantity,
             albums (title)
           )
         `)
@@ -124,12 +126,46 @@ const OrderManagement: React.FC = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      // Start a transaction-like operation
+      const { error: orderError } = await supabase
         .from('orders')
         .update({ status: newStatus })
         .eq('id', orderId);
 
-      if (error) throw error;
+      if (orderError) throw orderError;
+
+      // If status changed to completed and was previously pending, update fan card quantity
+      if (newStatus === 'completed' && order.status === 'pending' && order.fan_cards) {
+        const newQuantity = Math.max(0, order.fan_cards.quantity - order.quantity);
+        
+        const { error: fanCardError } = await supabase
+          .from('fan_cards')
+          .update({ quantity: newQuantity })
+          .eq('id', order.fan_card_id);
+
+        if (fanCardError) {
+          console.error('Error updating fan card quantity:', fanCardError);
+          // Don't throw here, just log the error as the order status was already updated
+          toast({
+            title: "Warning",
+            description: "Order status updated but fan card quantity update failed",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: `Order completed and ${order.quantity} cards deducted from available quantity`,
+          });
+        }
+      } else {
+        toast({
+          title: "Success",
+          description: `Order status updated to ${newStatus}`,
+        });
+      }
 
       // Track analytics when order status changes
       if (newStatus === 'completed') {
@@ -141,11 +177,6 @@ const OrderManagement: React.FC = () => {
             user_id: null
           });
       }
-
-      toast({
-        title: "Success",
-        description: `Order status updated to ${newStatus}`,
-      });
 
       fetchOrders(); // Refresh the list
     } catch (error) {
@@ -299,6 +330,9 @@ const OrderManagement: React.FC = () => {
                     </p>
                     <p className="text-gray-300 text-sm">
                       Client: {order.profiles?.client_name || 'Unknown Client'}
+                    </p>
+                    <p className="text-gray-300 text-sm">
+                      Available Cards: {order.fan_cards?.quantity || 0}
                     </p>
                     <p className="text-gray-400 text-xs">
                       {new Date(order.created_at).toLocaleDateString()}

@@ -36,7 +36,7 @@
 
     --radius: 0.5rem;
 
-    /* Sidebar specific colors can be adjusted if needed, for now they can inherit or use defaults */
+    /* Sidebar specific colors */
     --sidebar-background: 45 70% 90%; /* Lighter version of main background */
     --sidebar-foreground: 340 60% 9%;
     --sidebar-primary: 35 57% 57%;
@@ -47,46 +47,44 @@
     --sidebar-ring: 35 57% 57%;
   }
 
-  /* Dark mode is not explicitly requested, but we keep the structure.
-     If dark mode is needed, these colors would need to be defined according to the theme.
-     For now, they can mirror light mode or use generic dark fallbacks.
-  */
+  /* Dark mode with your color scheme adapted */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 340 60% 9%; /* #220C10 */
+    --foreground: 45 67% 86%; /* #F4E9C1 */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 340 60% 9%;
+    --card-foreground: 45 67% 86%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 340 60% 9%;
+    --popover-foreground: 45 67% 86%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 35 57% 57%; /* #D1A054 */
+    --primary-foreground: 340 60% 9%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 25 55% 52%; /* #C87343 */
+    --secondary-foreground: 45 67% 86%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 340 40% 15%;
+    --muted-foreground: 45 40% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 35 57% 57%; /* #D1A054 */
+    --accent-foreground: 340 60% 9%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 45 67% 86%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 25 40% 25%;
+    --input: 25 40% 20%;
+    --ring: 35 57% 57%;
+    
+    --sidebar-background: 340 50% 12%;
+    --sidebar-foreground: 45 67% 86%;
+    --sidebar-primary: 35 57% 57%;
+    --sidebar-primary-foreground: 340 60% 9%;
+    --sidebar-accent: 25 55% 52%;
+    --sidebar-accent-foreground: 45 67% 86%;
+    --sidebar-border: 25 40% 25%;
+    --sidebar-ring: 35 57% 57%;
   }
 }
 

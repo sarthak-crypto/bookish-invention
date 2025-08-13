@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, ShoppingCart, Package, Edit, CreditCard, Music, Users, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BuyMoreFanCardsDialog from '@/components/dashboard/BuyMoreFanCardsDialog';
+import EditFanCardDialog from '@/components/fancard/EditFanCardDialog';
 
 interface FanCard {
   id: string;
@@ -58,6 +58,7 @@ const FanCardDetailPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [buyMoreDialogOpen, setBuyMoreDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     if (cardId && user) {
@@ -124,6 +125,10 @@ const FanCardDetailPage: React.FC = () => {
   };
 
   const handleOrderComplete = () => {
+    fetchCardData();
+  };
+
+  const handleCardUpdated = () => {
     fetchCardData();
   };
 
@@ -251,7 +256,7 @@ const FanCardDetailPage: React.FC = () => {
                   Order More Cards
                 </Button>
                 
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Card
                 </Button>
@@ -408,6 +413,16 @@ const FanCardDetailPage: React.FC = () => {
           onOpenChange={setBuyMoreDialogOpen}
           fanCard={fanCard}
           onOrderComplete={handleOrderComplete}
+        />
+      )}
+
+      {/* Edit Fan Card Dialog */}
+      {fanCard && (
+        <EditFanCardDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          fanCard={fanCard}
+          onCardUpdated={handleCardUpdated}
         />
       )}
     </div>
