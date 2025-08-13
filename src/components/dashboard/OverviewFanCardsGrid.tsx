@@ -79,7 +79,7 @@ const OverviewFanCardsGrid: React.FC = () => {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">Loading your fan cards...</p>
+          <p className="text-center" style={{ color: '#C87343' }}>Loading your fan cards...</p>
         </CardContent>
       </Card>
     );
@@ -88,14 +88,14 @@ const OverviewFanCardsGrid: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
+        <CardTitle className="flex items-center gap-2 text-lg lg:text-xl" style={{ color: '#C87343' }}>
           <CreditCard className="h-5 w-5" />
           My Fan Cards
         </CardTitle>
       </CardHeader>
       <CardContent>
         {fanCards.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8 text-sm lg:text-base">
+          <p className="text-center py-8 text-sm lg:text-base" style={{ color: '#C87343' }}>
             No fan cards created yet. Create your first fan card to engage with your fans!
           </p>
         ) : (
@@ -108,10 +108,10 @@ const OverviewFanCardsGrid: React.FC = () => {
                   className="w-full h-32 sm:h-40 lg:h-48 object-cover"
                 />
                 <div className="p-3 lg:p-4">
-                  <h3 className="font-medium text-base lg:text-lg mb-1 truncate">
+                  <h3 className="font-medium text-base lg:text-lg mb-1 truncate" style={{ color: '#C87343' }}>
                     {card.albums?.title}
                   </h3>
-                  <p className="text-xs lg:text-sm text-muted-foreground mb-3 truncate">
+                  <p className="text-xs lg:text-sm mb-3 truncate" style={{ color: '#C87343' }}>
                     {card.albums?.artist_name || card.albums?.profiles?.client_name || 'Unknown Artist'}
                   </p>
                   <Button

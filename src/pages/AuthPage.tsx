@@ -1,66 +1,97 @@
 
 import React, { useEffect, useState } from 'react';
-import SignUpForm from '@/components/auth/SignUpForm';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/hooks/useAuth';
 import LoginForm from '@/components/auth/LoginForm';
+import SignUpForm from '@/components/auth/SignUpForm';
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Music } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const AuthPage: React.FC = () => {
+const AuthPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [isResetMode, setIsResetMode] = useState(false);
+  const [activeTab, setActiveTab] = useState('login');
+  const isResetMode = searchParams.get('reset') === 'true';
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !isResetMode) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate, isResetMode]);
 
   useEffect(() => {
-    // Check if we're in password reset mode
-    if (searchParams.get('reset') === 'true') {
-      setIsResetMode(true);
+    if (isResetMode) {
+      setActiveTab('reset');
     }
-  }, [searchParams]);
+  }, [isResetMode]);
 
   if (isResetMode) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-8 font-saira" style={{ backgroundColor: '#F4E9C1' }}>
-        <div className="absolute top-6 left-6">
-          <Link to="/" className="flex items-center text-primary" style={{ color: '#C87343' }}>
-            <Music className="h-8 w-8" />
-            <span className="ml-2 text-2xl font-bold">ArtisteConnect</span>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        {/* Header */}
+        <div className="absolute top-4 left-4">
+          <Link to="/" className="flex items-center space-x-2">
+            <Music className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold text-foreground-dark">FanCard</span>
           </Link>
         </div>
-        <div className="w-full max-w-md p-8 space-y-8 bg-white/80 rounded-xl shadow-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)'}}>
-          <ResetPasswordForm />
-        </div>
+
+        <Card className="w-full max-w-md bg-card border-border">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl text-foreground-dark">Reset Password</CardTitle>
+            <CardDescription className="text-foreground">
+              Enter your new password below
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResetPasswordForm />
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-8 font-saira" style={{ backgroundColor: '#F4E9C1' }}>
-      <div className="absolute top-6 left-6">
-        <Link to="/" className="flex items-center text-primary" style={{ color: '#C87343' }}>
-          <Music className="h-8 w-8" />
-          <span className="ml-2 text-2xl font-bold">ArtisteConnect</span>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Header */}
+      <div className="absolute top-4 left-4">
+        <Link to="/" className="flex items-center space-x-2">
+          <Music className="h-6 w-6 text-primary" />
+          <span className="text-xl font-bold text-foreground-dark">FanCard</span>
         </Link>
       </div>
-      <div className="w-full max-w-md p-8 space-y-8 bg-white/80 rounded-xl shadow-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)'}}>
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-primary/10">
-            <TabsTrigger value="login" style={{ color: '#220C10' }} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Login</TabsTrigger>
-            <TabsTrigger value="signup" style={{ color: '#220C10' }} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Sign Up</TabsTrigger>
-          </TabsList>
-          <TabsContent value="login" className="mt-6">
-            <h2 className="text-3xl font-bold text-center mb-6" style={{ color: '#C87343' }}>Welcome Back!</h2>
-            <LoginForm />
-          </TabsContent>
-          <TabsContent value="signup" className="mt-6">
-            <h2 className="text-3xl font-bold text-center mb-6" style={{ color: '#C87343' }}>Join ArtisteConnect</h2>
-            <SignUpForm />
-          </TabsContent>
-        </Tabs>
-      </div>
-       <p className="mt-8 text-center text-sm" style={{ color: '#220C10' }}>
-        By signing up, you agree to our (not yet existing) Terms of Service and Privacy Policy.
-      </p>
+
+      <Card className="w-full max-w-md bg-card border-border">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl text-foreground-dark">Welcome to FanCard</CardTitle>
+          <CardDescription className="text-foreground">
+            Sign in to your account or create a new one
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-muted">
+              <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:text-foreground-dark">
+                Login
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="data-[state=active]:bg-background data-[state=active]:text-foreground-dark">
+                Sign Up
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="login" className="space-y-4 mt-6">
+              <LoginForm />
+            </TabsContent>
+            <TabsContent value="signup" className="space-y-4 mt-6">
+              <SignUpForm />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

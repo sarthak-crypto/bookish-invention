@@ -1,63 +1,34 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { 
-  Music, 
-  Video, 
-  CreditCard, 
-  BarChart3, 
-  User,
-  Upload,
-  ShoppingCart,
-  Settings,
-  Plus,
-  Library,
-  Settings2,
-  Zap
-} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Upload, Music, Image, Video, CreditCard, User, Settings, Album, Key } from 'lucide-react';
 import CreateAlbum from '@/components/music/CreateAlbum';
 import MyMusic from '@/components/music/MyMusic';
-import AlbumManager from '@/components/music/AlbumManager';
-import RFIDCardManager from '@/components/music/RFIDCardManager';
-import AlbumApiKeys from '@/components/music/AlbumApiKeys';
-import PlaylistManager from '@/components/playlist/PlaylistManager';
 import UploadMusic from '@/components/music/UploadMusic';
-import MyVideos from '@/components/media/MyVideos';
 import UploadVideo from '@/components/media/UploadVideo';
+import MyVideos from '@/components/media/MyVideos';
+import ImageManager from '@/components/media/ImageManager';
 import CreateFanCard from '@/components/fancard/CreateFanCard';
 import MyFanCards from '@/components/fancard/MyFanCards';
-import FanCardMarketplace from '@/components/fancard/FanCardMarketplace';
-import ArtistAnalyticsDashboard from '@/components/analytics/ArtistAnalyticsDashboard';
-import DetailedAnalytics from '@/components/analytics/DetailedAnalytics';
-import ImageManager from '@/components/media/ImageManager';
 import BioManager from '@/components/profile/BioManager';
 import SocialMediaManager from '@/components/profile/SocialMediaManager';
+import PublicProfileLink from '@/components/profile/PublicProfileLink';
 import OverviewFanCardsGrid from '@/components/dashboard/OverviewFanCardsGrid';
+import AlbumManager from '@/components/music/AlbumManager';
+import AlbumApiKeys from '@/components/music/AlbumApiKeys';
 
-const DashboardPage = () => {
+const DashboardPage: React.FC = () => {
   const { user, isLoading } = useAuth();
-  const [musicActiveTab, setMusicActiveTab] = React.useState<string | null>(null);
-
-  const navigateToTab = (tabValue: string) => {
-    const tabTrigger = document.querySelector(`[data-state="inactive"][value="${tabValue}"]`) as HTMLElement;
-    if (tabTrigger) {
-      tabTrigger.click();
-    }
-  };
-
-  const handleMusicCardClick = (tabValue: string) => {
-    setMusicActiveTab(tabValue);
-  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mb-4"></div>
-          <p>Loading your dashboard...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -67,250 +38,266 @@ const DashboardPage = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  const navigateToTab = (tabValue: string) => {
+    const tabTrigger = document.querySelector(`[data-value="${tabValue}"]`) as HTMLElement;
+    if (tabTrigger) {
+      tabTrigger.click();
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
       <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back! 👋
+          <h1 className="text-4xl font-bold text-foreground mb-2">
+            Welcome back, {user.user_metadata?.full_name || user.email}!
           </h1>
-          <p className="text-gray-600">
-            Manage your music, fan cards, and connect with your audience.
+          <p className="text-muted-foreground">
+            Manage your music, content, and fan cards from your dashboard.
           </p>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Overview
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-none lg:inline-flex">
+            <TabsTrigger value="overview" className="flex items-center gap-2" style={{ color: '#C87343' }}>
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="music" className="flex items-center gap-2">
+            <TabsTrigger value="music" className="flex items-center gap-2" style={{ color: '#C87343' }}>
               <Music className="h-4 w-4" />
-              Music
+              <span className="hidden sm:inline">Music</span>
             </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-2">
+            <TabsTrigger value="content" className="flex items-center gap-2" style={{ color: '#C87343' }}>
               <Upload className="h-4 w-4" />
-              Content
+              <span className="hidden sm:inline">Content</span>
             </TabsTrigger>
-            <TabsTrigger value="fan-cards" className="flex items-center gap-2">
+            <TabsTrigger value="fancards" className="flex items-center gap-2" style={{ color: '#C87343' }}>
               <CreditCard className="h-4 w-4" />
-              Fan Cards
+              <span className="hidden sm:inline">Fan Cards</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="flex items-center gap-2">
+            <TabsTrigger value="profile" className="flex items-center gap-2" style={{ color: '#C87343' }}>
               <User className="h-4 w-4" />
-              Profile
+              <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Fan Cards Grid */}
-            <OverviewFanCardsGrid />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-card border-border hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">Quick Actions</CardTitle>
+                  <Music className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Your recent activity will appear here...</p>
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => navigateToTab('music')} 
+                      className="w-full justify-start" 
+                      variant="ghost"
+                      style={{ color: '#C87343' }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Album
+                    </Button>
+                    <Button 
+                      onClick={() => navigateToTab('content')} 
+                      className="w-full justify-start" 
+                      variant="ghost"
+                      style={{ color: '#C87343' }}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Content
+                    </Button>
+                    <Button 
+                      onClick={() => navigateToTab('fancards')} 
+                      className="w-full justify-start" 
+                      variant="ghost"
+                      style={{ color: '#C87343' }}
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Create Fan Card
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Stats</CardTitle>
+              <Card className="bg-card border-border hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">Recent Activity</CardTitle>
+                  <Settings className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Your performance metrics will appear here...</p>
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground">No recent activity</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">Profile</CardTitle>
+                  <User className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => navigateToTab('profile')} 
+                      className="w-full justify-start" 
+                      variant="ghost"
+                      style={{ color: '#C87343' }}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                    <Button 
+                      onClick={() => navigateToTab('profile')} 
+                      className="w-full justify-start" 
+                      variant="ghost"
+                      style={{ color: '#C87343' }}
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">Statistics</CardTitle>
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground">Loading stats...</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
+
+            <OverviewFanCardsGrid />
           </TabsContent>
 
-          {/* Music Management Section */}
           <TabsContent value="music" className="space-y-6">
-            {!musicActiveTab ? (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Music Management</h2>
-                  <p className="text-gray-600">Create, manage, and organize your music content</p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleMusicCardClick('create-album')}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Plus className="h-5 w-5 text-primary" />
-                        Create Project
-                      </CardTitle>
-                      <CardDescription>Start creating your next project</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Set up a new project with cover art, track listings, and metadata.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleMusicCardClick('my-music')}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Library className="h-5 w-5 text-primary" />
-                        My Music
-                      </CardTitle>
-                      <CardDescription>Browse and manage your music library</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        View all your uploaded tracks, edit details, and organize your music.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleMusicCardClick('manage-albums')}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Settings2 className="h-5 w-5 text-primary" />
-                        Manage Projects
-                      </CardTitle>
-                      <CardDescription>Edit and organize your project collections</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Update project information, reorder tracks, and manage releases.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleMusicCardClick('rfid-cards')}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5 text-primary" />
-                        RFID Cards
-                      </CardTitle>
-                      <CardDescription>Manage physical music cards and NFC integration</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Configure RFID cards for contactless music sharing and fan engagement.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleMusicCardClick('api-keys')}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Zap className="h-5 w-5 text-primary" />
-                        API Keys
-                      </CardTitle>
-                      <CardDescription>Manage API access and integrations</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Generate and manage API keys for third-party integrations and services.
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap gap-3">
-                    <Button onClick={() => handleMusicCardClick('create-album')} className="flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
-                      Create New Project
-                    </Button>
-                    <Button variant="outline" onClick={() => navigateToTab('content')} className="flex items-center gap-2">
-                      <Upload className="h-4 w-4" />
-                      Upload Music
-                    </Button>
-                    <Button variant="outline" onClick={() => handleMusicCardClick('my-music')} className="flex items-center gap-2">
-                      <Library className="h-4 w-4" />
-                      View Library
-                    </Button>
-                  </CardContent>
-                </Card>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex flex-wrap gap-4">
+                <Button className="flex items-center gap-2" style={{ color: '#C87343' }}>
+                  <Plus className="h-4 w-4" />
+                  Create New Project
+                </Button>
+                <Button variant="outline" onClick={() => navigateToTab('content')} className="flex items-center gap-2" style={{ color: '#C87343' }}>
+                  <Upload className="h-4 w-4" />
+                  Upload Music
+                </Button>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 mb-6">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setMusicActiveTab(null)}
-                    className="flex items-center gap-2"
-                  >
-                    ← Back to Music Overview
-                  </Button>
-                </div>
-                
-                {musicActiveTab === 'create-album' && <CreateAlbum />}
-                {musicActiveTab === 'my-music' && <MyMusic />}
-                {musicActiveTab === 'manage-albums' && <AlbumManager />}
-                {musicActiveTab === 'rfid-cards' && <RFIDCardManager />}
-                {musicActiveTab === 'api-keys' && <AlbumApiKeys />}
-              </div>
-            )}
+            </div>
+
+            <Tabs defaultValue="albums" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="albums" style={{ color: '#C87343' }}>
+                  <Album className="h-4 w-4 mr-2" />
+                  Albums
+                </TabsTrigger>
+                <TabsTrigger value="tracks" style={{ color: '#C87343' }}>
+                  <Music className="h-4 w-4 mr-2" />
+                  All Tracks
+                </TabsTrigger>
+                <TabsTrigger value="manage" style={{ color: '#C87343' }}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage Albums
+                </TabsTrigger>
+                <TabsTrigger value="api-keys" style={{ color: '#C87343' }}>
+                  <Key className="h-4 w-4 mr-2" />
+                  API Keys
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="albums">
+                <CreateAlbum />
+              </TabsContent>
+
+              <TabsContent value="tracks">
+                <MyMusic />
+              </TabsContent>
+
+              <TabsContent value="manage">
+                <AlbumManager />
+              </TabsContent>
+
+              <TabsContent value="api-keys">
+                <AlbumApiKeys />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          {/* Content Creation Section */}
-          <TabsContent value="content" className="space-y-4">
+          <TabsContent value="content" className="space-y-6">
             <Tabs defaultValue="upload-music" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-1">
-                <TabsTrigger value="upload-music">Upload Music</TabsTrigger>
-                <TabsTrigger value="upload-video">Upload Video</TabsTrigger>
-                <TabsTrigger value="manage-images">Manage Images</TabsTrigger>
+              <TabsList>
+                <TabsTrigger value="upload-music" style={{ color: '#C87343' }}>
+                  <Music className="h-4 w-4 mr-2" />
+                  Upload Music
+                </TabsTrigger>
+                <TabsTrigger value="upload-video" style={{ color: '#C87343' }}>
+                  <Video className="h-4 w-4 mr-2" />
+                  Upload Video
+                </TabsTrigger>
+                <TabsTrigger value="my-videos" style={{ color: '#C87343' }}>
+                  <Video className="h-4 w-4 mr-2" />
+                  My Videos
+                </TabsTrigger>
+                <TabsTrigger value="images" style={{ color: '#C87343' }}>
+                  <Image className="h-4 w-4 mr-2" />
+                  Images
+                </TabsTrigger>
               </TabsList>
+
               <TabsContent value="upload-music">
                 <UploadMusic />
               </TabsContent>
+
               <TabsContent value="upload-video">
                 <UploadVideo />
               </TabsContent>
-              <TabsContent value="manage-images">
+
+              <TabsContent value="my-videos">
+                <MyVideos />
+              </TabsContent>
+
+              <TabsContent value="images">
                 <ImageManager />
               </TabsContent>
             </Tabs>
           </TabsContent>
 
-          {/* Fan Cards Section */}
-          <TabsContent value="fan-cards" className="space-y-4">
-            <Tabs defaultValue="create-card" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-1">
-                <TabsTrigger value="create-card">Create Fan Card</TabsTrigger>
-                <TabsTrigger value="my-cards">My Fan Cards</TabsTrigger>
-                <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+          <TabsContent value="fancards" className="space-y-6">
+            <Tabs defaultValue="create" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="create" style={{ color: '#C87343' }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Fan Card
+                </TabsTrigger>
+                <TabsTrigger value="my-cards" style={{ color: '#C87343' }}>
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  My Fan Cards
+                </TabsTrigger>
               </TabsList>
-              <TabsContent value="create-card">
+
+              <TabsContent value="create">
                 <CreateFanCard />
               </TabsContent>
+
               <TabsContent value="my-cards">
                 <MyFanCards />
-              </TabsContent>
-              <TabsContent value="marketplace">
-                <FanCardMarketplace />
               </TabsContent>
             </Tabs>
           </TabsContent>
 
-          {/* Profile Section */}
-          <TabsContent value="profile" className="space-y-4">
-            <Tabs defaultValue="bio" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 gap-1">
-                <TabsTrigger value="bio">Bio & Profile</TabsTrigger>
-                <TabsTrigger value="social">Social Media</TabsTrigger>
-              </TabsList>
-              <TabsContent value="bio">
-                <BioManager />
-              </TabsContent>
-              <TabsContent value="social">
-                <SocialMediaManager />
-              </TabsContent>
-            </Tabs>
+          <TabsContent value="profile" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BioManager />
+              <SocialMediaManager />
+            </div>
+            <PublicProfileLink />
           </TabsContent>
         </Tabs>
       </div>

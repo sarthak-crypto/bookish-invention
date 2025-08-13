@@ -63,18 +63,18 @@ export default function SignUpForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto bg-card border-border">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
-          <UserPlus className="h-6 w-6" />
+        <CardTitle className="text-2xl text-center flex items-center justify-center gap-2 text-foreground-dark">
+          <UserPlus className="h-6 w-6 text-primary" />
           Sign Up
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSignUp} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="clientName" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
+            <Label htmlFor="clientName" className="flex items-center gap-2 text-foreground">
+              <User className="h-4 w-4 text-primary" />
               Client Name
             </Label>
             <Input
@@ -84,12 +84,13 @@ export default function SignUpForm() {
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               required
+              className="bg-background border-border text-foreground-dark focus:border-primary"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
+            <Label htmlFor="email" className="flex items-center gap-2 text-foreground">
+              <Mail className="h-4 w-4 text-primary" />
               Email
             </Label>
             <Input
@@ -99,12 +100,13 @@ export default function SignUpForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="bg-background border-border text-foreground-dark focus:border-primary"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password" className="flex items-center gap-2">
-              <Lock className="h-4 w-4" />
+            <Label htmlFor="password" className="flex items-center gap-2 text-foreground">
+              <Lock className="h-4 w-4 text-primary" />
               Password
             </Label>
             <Input
@@ -114,10 +116,11 @@ export default function SignUpForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="bg-background border-border text-foreground-dark focus:border-primary"
             />
           </div>
           
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={isLoading}>
             {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Button>
         </form>
