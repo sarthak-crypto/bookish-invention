@@ -88,35 +88,36 @@ const OverviewFanCardsGrid: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
           <CreditCard className="h-5 w-5" />
           My Fan Cards
         </CardTitle>
       </CardHeader>
       <CardContent>
         {fanCards.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
+          <p className="text-center text-muted-foreground py-8 text-sm lg:text-base">
             No fan cards created yet. Create your first fan card to engage with your fans!
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
             {fanCards.map((card) => (
               <div key={card.id} className="border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
                 <img
                   src={card.artwork_url}
                   alt={`Fan card for ${card.albums?.title}`}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-32 sm:h-40 lg:h-48 object-cover"
                 />
-                <div className="p-4">
-                  <h3 className="font-medium text-lg mb-1">
+                <div className="p-3 lg:p-4">
+                  <h3 className="font-medium text-base lg:text-lg mb-1 truncate">
                     {card.albums?.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <p className="text-xs lg:text-sm text-muted-foreground mb-3 truncate">
                     {card.albums?.artist_name || card.albums?.profiles?.client_name || 'Unknown Artist'}
                   </p>
                   <Button
                     onClick={() => handleViewDetails(card.id)}
-                    className="w-full bg-primary hover:bg-primary/90"
+                    className="w-full bg-primary hover:bg-primary/90 text-sm lg:text-base"
+                    size="sm"
                   >
                     Details
                   </Button>

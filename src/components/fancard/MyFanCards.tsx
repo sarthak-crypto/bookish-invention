@@ -94,36 +94,36 @@ const MyFanCards: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
           <CreditCard className="h-5 w-5" />
           My Fan Cards
         </CardTitle>
       </CardHeader>
       <CardContent>
         {fanCards.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
+          <p className="text-center text-muted-foreground py-8 text-sm lg:text-base">
             No fan cards created yet. Create your first fan card to engage with your fans!
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-4">
             {fanCards.map((card) => (
               <div key={card.id} className="border rounded-lg overflow-hidden">
                 <img
                   src={card.artwork_url}
                   alt={`Fan card for ${card.albums?.title}`}
-                  className="w-full h-40 object-cover"
+                  className="w-full h-32 sm:h-36 lg:h-40 object-cover"
                 />
-                <div className="p-4">
-                  <p className="font-medium">{card.albums?.title} Fan Card</p>
-                  <p className="text-sm text-muted-foreground mb-2">
+                <div className="p-3 lg:p-4">
+                  <p className="font-medium text-sm lg:text-base truncate">{card.albums?.title} Fan Card</p>
+                  <p className="text-xs lg:text-sm text-muted-foreground mb-2 line-clamp-2">
                     {card.description || "No description"}
                   </p>
-                  <p className="font-bold text-primary mb-3">
+                  <p className="font-bold text-primary mb-3 text-sm lg:text-base">
                     Quantity: {card.quantity}
                   </p>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Edit className="h-4 w-4 mr-1" />
+                    <Button variant="outline" size="sm" className="flex-1 text-xs lg:text-sm">
+                      <Edit className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                       Edit
                     </Button>
                     <Button 
@@ -131,7 +131,7 @@ const MyFanCards: React.FC = () => {
                       size="sm"
                       onClick={() => handleDelete(card.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3 lg:h-4 lg:w-4" />
                     </Button>
                   </div>
                 </div>
