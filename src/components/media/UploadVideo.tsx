@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +14,11 @@ interface Track {
   title: string;
 }
 
-const UploadVideo: React.FC = () => {
+interface UploadVideoProps {
+  onUploadComplete?: () => void;
+}
+
+const UploadVideo: React.FC<UploadVideoProps> = ({ onUploadComplete }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -123,6 +126,11 @@ const UploadVideo: React.FC = () => {
       const thumbnailInput = document.getElementById('thumbnail-file') as HTMLInputElement;
       if (videoInput) videoInput.value = '';
       if (thumbnailInput) thumbnailInput.value = '';
+
+      // Call onUploadComplete callback if provided
+      if (onUploadComplete) {
+        onUploadComplete();
+      }
 
     } catch (error) {
       console.error('Error uploading video:', error);

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -117,9 +117,10 @@ const OrderCardsDialog: React.FC<OrderCardsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogOverlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+      <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-[500px] max-h-[90vh] translate-x-[-50%] translate-y-[-50%] gap-4 border border-border bg-background text-foreground shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg overflow-y-auto p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-foreground">
             <ShoppingCart className="h-5 w-5" />
             Order Fan Cards
           </DialogTitle>
@@ -127,14 +128,14 @@ const OrderCardsDialog: React.FC<OrderCardsDialogProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Fan Card Preview */}
-          <div className="flex items-center gap-4 p-4 border rounded-lg">
+          <div className="flex items-center gap-4 p-4 border border-border rounded-lg bg-muted/50">
             <img
               src={fanCard.artwork_url}
               alt="Fan card"
               className="w-16 h-16 object-cover rounded"
             />
             <div className="flex-1">
-              <p className="font-medium">Fan Card</p>
+              <p className="font-medium text-foreground">Fan Card</p>
               <p className="text-sm text-muted-foreground">
                 Available: {fanCard.quantity} cards
               </p>
@@ -149,7 +150,7 @@ const OrderCardsDialog: React.FC<OrderCardsDialogProps> = ({
           {/* Order Details */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="quantity">Quantity to Order</Label>
+              <Label htmlFor="quantity" className="text-foreground">Quantity to Order</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -158,6 +159,7 @@ const OrderCardsDialog: React.FC<OrderCardsDialogProps> = ({
                 value={formData.quantity}
                 onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 1)}
                 required
+                className="bg-background border-border text-foreground"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Price: $10 per card × {formData.quantity} = ${formData.quantity * 10}
@@ -165,90 +167,97 @@ const OrderCardsDialog: React.FC<OrderCardsDialogProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-foreground">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 required
+                className="bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" className="text-foreground">Full Name</Label>
               <Input
                 id="name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 required
+                className="bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <Label htmlFor="address">Street Address</Label>
+              <Label htmlFor="address" className="text-foreground">Street Address</Label>
               <Textarea
                 id="address"
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 required
+                className="bg-background border-border text-foreground"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city" className="text-foreground">City</Label>
                 <Input
                   id="city"
                   type="text"
                   value={formData.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
                   required
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="state">State</Label>
+                <Label htmlFor="state" className="text-foreground">State</Label>
                 <Input
                   id="state"
                   type="text"
                   value={formData.state}
                   onChange={(e) => handleInputChange('state', e.target.value)}
                   required
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="zipCode">ZIP Code</Label>
+                <Label htmlFor="zipCode" className="text-foreground">ZIP Code</Label>
                 <Input
                   id="zipCode"
                   type="text"
                   value={formData.zipCode}
                   onChange={(e) => handleInputChange('zipCode', e.target.value)}
                   required
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country" className="text-foreground">Country</Label>
                 <Input
                   id="country"
                   type="text"
                   value={formData.country}
                   onChange={(e) => handleInputChange('country', e.target.value)}
                   required
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
           </div>
 
           {/* Info Box */}
-          <div className="bg-muted p-4 rounded-lg">
+          <div className="bg-muted p-4 rounded-lg border border-border">
             <div className="flex items-start gap-2">
               <Mail className="h-4 w-4 mt-0.5 text-muted-foreground" />
               <div className="text-sm">
-                <p className="font-medium">Order Process</p>
+                <p className="font-medium text-foreground">Order Process</p>
                 <p className="text-muted-foreground">
                   After placing your order, our team will contact you within 48 hours with payment details and shipping information.
                 </p>

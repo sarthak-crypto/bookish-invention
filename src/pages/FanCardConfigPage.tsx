@@ -6,8 +6,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, ShoppingCart, Package, Edit, Ruler } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import FanCardPreview from '@/components/fancard/FanCardPreview';
 import CardTypeSelector, { CardType } from '@/components/fancard/CardTypeSelector';
 
 interface FanCard {
@@ -25,7 +26,7 @@ interface FanCard {
   };
 }
 
-const CardDetailPage: React.FC = () => {
+const FanCardConfigPage: React.FC = () => {
   const { cardId } = useParams<{ cardId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -92,7 +93,7 @@ const CardDetailPage: React.FC = () => {
           fan_card_id: fanCard.id,
           quantity: fanCard.quantity,
           status: 'pending',
-          total_amount: 0,
+          total_amount: 0, // TBD - pricing will be determined by card type
           shipping_address: {
             card_type: selectedCardType,
             special_instructions: `Card Type: ${selectedCardType}`
@@ -101,7 +102,7 @@ const CardDetailPage: React.FC = () => {
 
       if (orderError) throw orderError;
 
-      // Update fan card status to pending and mark as purchased
+      // Update fan card status
       const { error: updateError } = await supabase
         .from('fan_cards')
         .update({
@@ -113,13 +114,31 @@ const CardDetailPage: React.FC = () => {
 
       if (updateError) throw updateError;
 
+      // Send notification to Tapyoca Support (placeholder for email/webhook)
+      const { error: notificationError } = await supabase.functions.invoke('send-order-notification', {
+        body: {
+          orderId: fanCard.id,
+          userEmail: user.email,
+          userName: user.email?.split('@')[0] || 'User',
+          fanCardTitle: `${fanCard.albums?.title || 'Project'} - Fan Card`,
+          cardType: selectedCardType,
+          quantity: fanCard.quantity,
+          artworkUrl: fanCard.artwork_url
+        }
+      });
+
+      if (notificationError) {
+        console.warn('Failed to send notification to support:', notificationError);
+        // Don't fail the order if notification fails
+      }
+
       toast({
         title: "Order Submitted Successfully!",
-        description: "Your fan card order has been sent to Tapyoca Support for processing.",
+        description: "Your fan card order has been sent to Tapyoca Support for processing. You'll be notified once it's approved and shipped.",
       });
 
       // Navigate back to project detail page
-      navigate(`/project/${fanCard.album_id}`);
+      navigate(`/projects/${fanCard.album_id}`);
 
     } catch (error) {
       console.error('Error submitting order:', error);
@@ -133,29 +152,17 @@ const CardDetailPage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'approved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'shipped':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+  const handleGoBack = () => {
+    if (fanCard?.album_id) {
+      navigate(`/projects/${fanCard.album_id}`);
+    } else {
+      navigate('/projects');
     }
   };
 
-  const isCardPending = fanCard?.status === 'pending';
-  const canOrder = fanCard && !fanCard.purchased && fanCard.status !== 'shipped';
+  const canSubmitOrder = () => {
+    return fanCard && !fanCard.purchased && selectedCardType && fanCard.status !== 'shipped';
+  };
 
   if (loading) {
     return (
@@ -173,6 +180,7 @@ const CardDetailPage: React.FC = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-6">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-4">Card Not Found</h1>
             <p className="text-muted-foreground mb-4">
               The fan card you're looking for doesn't exist or you don't have access to it.
@@ -195,7 +203,7 @@ const CardDetailPage: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/project/${fanCard.album_id}`)}
+              onClick={handleGoBack}
               className="mt-1"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -216,88 +224,11 @@ const CardDetailPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 space-y-8">
-        
         {/* Card Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Card Artwork Preview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col lg:flex-row gap-6">
-              {/* Main Image */}
-              <div className="lg:w-1/2">
-                <div className="relative bg-muted rounded-lg overflow-hidden" style={{ aspectRatio: '2.361 / 3.611' }}>
-                  <img
-                    src={fanCard.artwork_url}
-                    alt="Fan card artwork"
-                    className={`w-full h-full object-cover ${
-                      isCardPending ? 'filter grayscale' : ''
-                    }`}
-                  />
-                  {isCardPending && (
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <Badge className="bg-yellow-500 text-white">
-                        Pending Approval
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Dimensions Info */}
-                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  <Ruler className="h-4 w-4" />
-                  Card Dimensions: 2.361" × 3.611"
-                </div>
-              </div>
+        <FanCardPreview fanCard={fanCard} />
 
-              {/* Card Details */}
-              <div className="lg:w-1/2 space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Card Information</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Project</p>
-                      <p className="font-medium">{fanCard.albums?.title || 'Unnamed Project'}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-muted-foreground">Status</p>
-                      <Badge className={getStatusColor(fanCard.status)}>
-                        {fanCard.status.charAt(0).toUpperCase() + fanCard.status.slice(1)}
-                      </Badge>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground">Quantity</p>
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{fanCard.quantity} cards</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground">Upload Date</p>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{formatDate(fanCard.created_at)}</span>
-                      </div>
-                    </div>
-
-                    {fanCard.description && (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Description</p>
-                        <p className="text-sm">{fanCard.description}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card Type Selection - Only show if card can still be ordered */}
-        {canOrder && (
+        {/* Card Type Selection */}
+        {!fanCard.purchased && fanCard.status !== 'shipped' && (
           <Card>
             <CardHeader>
               <CardTitle>Select Card Type</CardTitle>
@@ -335,11 +266,14 @@ const CardDetailPage: React.FC = () => {
             </div>
 
             {fanCard.purchased ? (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-medium text-green-800 mb-2">Order Already Submitted</h4>
-                <p className="text-sm text-green-600">
-                  Your order has been sent to Tapyoca Support and is being processed.
-                </p>
+              <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-green-800">Order Already Submitted</p>
+                  <p className="text-sm text-green-600">
+                    Your order has been sent to Tapyoca Support and is being processed.
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -354,14 +288,16 @@ const CardDetailPage: React.FC = () => {
                   </ol>
                 </div>
 
-                <Button
-                  onClick={handleSubmitOrder}
-                  disabled={!selectedCardType || isSubmitting}
-                  className="w-full"
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Submitting Order...' : 'Submit Order'}
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleSubmitOrder}
+                    disabled={!canSubmitOrder() || isSubmitting}
+                    className="flex-1"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    {isSubmitting ? 'Submitting Order...' : 'Submit Order'}
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
@@ -371,4 +307,4 @@ const CardDetailPage: React.FC = () => {
   );
 };
 
-export default CardDetailPage;
+export default FanCardConfigPage;
